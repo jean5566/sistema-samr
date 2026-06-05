@@ -1,0 +1,56 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { PublicLayout } from './layouts/PublicLayout'
+import { DashboardLayout } from './layouts/DashboardLayout'
+import { Landing } from './pages/Landing'
+import { Login } from './pages/Login'
+import { SobreCarrera } from './pages/SobreCarrera'
+import { DocentesPage } from './pages/Docentes'
+import { NoticiasPage } from './pages/Noticias'
+import { AdminDashboard } from './pages/admin/Dashboard'
+import { AdminUsuarios } from './pages/admin/Usuarios'
+import { AdminNoticias } from './pages/admin/Noticias'
+import { AdminDocumentos } from './pages/admin/Documentos'
+import { AdminConfiguracion } from './pages/admin/Configuracion'
+import { DocenteDashboard } from './pages/docente/Dashboard'
+import { DocentePerfil } from './pages/docente/Perfil'
+import { EstudianteDashboard } from './pages/estudiante/Dashboard'
+import { EstudianteDocentes } from './pages/estudiante/Docentes'
+import { EstudianteDocumentos } from './pages/estudiante/Documentos'
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route index element={<Landing />} />
+          <Route path="/sobre" element={<SobreCarrera />} />
+          <Route path="/docentes" element={<DocentesPage />} />
+          <Route path="/noticias" element={<NoticiasPage />} />
+        </Route>
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/dashboard/admin" element={<DashboardLayout role="admin" />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="usuarios" element={<AdminUsuarios />} />
+          <Route path="noticias" element={<AdminNoticias />} />
+          <Route path="documentos" element={<AdminDocumentos />} />
+          <Route path="configuracion" element={<AdminConfiguracion />} />
+        </Route>
+
+        <Route path="/dashboard/docente" element={<DashboardLayout role="docente" />}>
+          <Route index element={<DocenteDashboard />} />
+          <Route path="perfil" element={<DocentePerfil />} />
+        </Route>
+
+        <Route path="/dashboard/estudiante" element={<DashboardLayout role="estudiante" />}>
+          <Route index element={<EstudianteDashboard />} />
+          <Route path="docentes" element={<EstudianteDocentes />} />
+          <Route path="documentos" element={<EstudianteDocumentos />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
