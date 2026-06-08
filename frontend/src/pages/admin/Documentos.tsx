@@ -1,14 +1,18 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import api from '../../lib/api'
 
 interface Documento {
   id: number
   nombre: string
   tipo: 'planificacion' | 'curriculo' | 'reglamento' | 'resolucion' | 'otro'
   acceso: 'publico' | 'interno'
-  descripcion: string
+  descripcion: string | null
   archivo: string
-  subidoPor: string
-  fecha: string
+  archivo_nombre: string
+  archivo_tamanio: number | null
+  archivo_url: string
+  created_at: string
+  autor: { id: number; name: string }
 }
 
 const tipoConfig: Record<string, { label: string; cls: string }> = {
@@ -27,30 +31,44 @@ const extStyle: Record<string, { bg: string; text: string }> = {
   xls:  { bg: 'bg-emerald-50',text: 'text-emerald-600' },
 }
 
-const initialDocs: Documento[] = [
-  { id: 1, nombre: 'Plan de Estudios 2026',                   tipo: 'planificacion', acceso: 'publico',  descripcion: 'Malla curricular vigente del período 2026.',               archivo: 'plan_estudios_2026.pdf',      subidoPor: 'Carlos Mendoza', fecha: '2026-01-10' },
-  { id: 2, nombre: 'Rediseño Curricular TI 2025',             tipo: 'curriculo',     acceso: 'publico',  descripcion: 'Propuesta aprobada de rediseño curricular.',               archivo: 'rediseno_curriculo_2025.pdf', subidoPor: 'Carlos Mendoza', fecha: '2025-11-20' },
-  { id: 3, nombre: 'Reglamento Interno de la Carrera',        tipo: 'reglamento',    acceso: 'publico',  descripcion: 'Normativa general que rige la carrera de TI.',             archivo: 'reglamento_cti.pdf',          subidoPor: 'Carlos Mendoza', fecha: '2025-08-05' },
-  { id: 4, nombre: 'Resolución de Aprobación Período 2026-I', tipo: 'resolucion',    acceso: 'interno',  descripcion: 'Resolución emitida por el consejo directivo.',             archivo: 'resolucion_2026_I.pdf',       subidoPor: 'Carlos Mendoza', fecha: '2026-01-15' },
-  { id: 5, nombre: 'Planificación Académica Semestre I 2026', tipo: 'planificacion', acceso: 'interno',  descripcion: 'Distribución de materias, horarios y docentes.',           archivo: 'planificacion_2026_I.xlsx',   subidoPor: 'Carlos Mendoza', fecha: '2026-02-01' },
-  { id: 6, nombre: 'Reglamento de Titulación',                tipo: 'reglamento',    acceso: 'publico',  descripcion: 'Proceso, requisitos y modalidades para la titulación.',   archivo: 'reglamento_titulacion.pdf',   subidoPor: 'Carlos Mendoza', fecha: '2025-09-12' },
-]
-
-const emptyForm = { nombre: '', tipo: 'planificacion' as Documento['tipo'], acceso: 'publico' as Documento['acceso'], descripcion: '', archivo: '' }
 const getExt = (nombre: string) => nombre.split('.').pop()?.toLowerCase() ?? 'pdf'
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes) return '—'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const emptyForm = {
+  nombre: '', tipo: 'planificacion' as Documento['tipo'],
+  acceso: 'publico' as Documento['acceso'], descripcion: '',
+}
 
 const inputCls = 'w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder:text-gray-400'
 const labelCls = 'block text-sm font-medium text-gray-700 mb-2'
 
 export function AdminDocumentos() {
-  const [docs, setDocs]                   = useState<Documento[]>(initialDocs)
+  const [docs, setDocs]                   = useState<Documento[]>([])
+  const [loading, setLoading]             = useState(true)
+  const [error, setError]                 = useState<string | null>(null)
   const [search, setSearch]               = useState('')
   const [filterTipo, setFilterTipo]       = useState('')
   const [filterAcceso, setFilterAcceso]   = useState('')
   const [modalOpen, setModalOpen]         = useState(false)
   const [editingId, setEditingId]         = useState<number | null>(null)
   const [form, setForm]                   = useState(emptyForm)
+  const [selectedFile, setSelectedFile]   = useState<File | null>(null)
+  const [saving, setSaving]               = useState(false)
+  const [formError, setFormError]         = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    api.get<Documento[]>('/documentos/todos')
+      .then(res => setDocs(res.data))
+      .catch(() => setError('No se pudo cargar los documentos.'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filtered = useMemo(() =>
     docs.filter(d =>
@@ -59,22 +77,52 @@ export function AdminDocumentos() {
       (filterAcceso ? d.acceso === filterAcceso : true)
     ), [docs, search, filterTipo, filterAcceso])
 
-  function openNew()  { setEditingId(null); setForm(emptyForm); setModalOpen(true) }
-  function openEdit(id: number) {
-    const d = docs.find(x => x.id === id)!
-    setEditingId(id)
-    setForm({ nombre: d.nombre, tipo: d.tipo, acceso: d.acceso, descripcion: d.descripcion, archivo: d.archivo })
-    setModalOpen(true)
+  function openNew() {
+    setEditingId(null); setForm(emptyForm); setSelectedFile(null); setFormError(null); setModalOpen(true)
   }
-  function save() {
-    if (!form.nombre) return
-    const archivo = fileRef.current?.files?.[0]?.name || form.archivo || 'documento.pdf'
-    if (editingId !== null) {
-      setDocs(p => p.map(d => d.id === editingId ? { ...d, ...form, archivo } : d))
-    } else {
-      setDocs(p => [{ id: Date.now(), ...form, archivo, subidoPor: 'Carlos Mendoza', fecha: new Date().toISOString().slice(0, 10) }, ...p])
+  function openEdit(d: Documento) {
+    setEditingId(d.id)
+    setForm({ nombre: d.nombre, tipo: d.tipo, acceso: d.acceso, descripcion: d.descripcion ?? '' })
+    setSelectedFile(null); setFormError(null); setModalOpen(true)
+  }
+
+  async function save() {
+    if (!form.nombre.trim()) { setFormError('El nombre es obligatorio.'); return }
+    if (editingId === null && !selectedFile) { setFormError('Debes seleccionar un archivo.'); return }
+
+    setSaving(true); setFormError(null)
+    try {
+      const fd = new FormData()
+      fd.append('nombre', form.nombre)
+      fd.append('tipo', form.tipo)
+      fd.append('acceso', form.acceso)
+      fd.append('descripcion', form.descripcion)
+      if (selectedFile) fd.append('archivo', selectedFile)
+      if (editingId !== null) fd.append('_method', 'PUT')
+
+      const url = editingId !== null ? `/documentos/${editingId}` : '/documentos'
+      const { data } = await api.post<Documento>(url, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
+      if (editingId !== null) {
+        setDocs(p => p.map(d => d.id === editingId ? data : d))
+      } else {
+        setDocs(p => [data, ...p])
+      }
+      setModalOpen(false)
+    } catch (e: any) {
+      const errs = e?.response?.data?.errors
+      const msg  = errs ? Object.values(errs).flat().join(' ') : (e?.response?.data?.message ?? 'Error al guardar.')
+      setFormError(msg)
+    } finally {
+      setSaving(false)
     }
-    setModalOpen(false)
+  }
+
+  async function remove(id: number) {
+    await api.delete(`/documentos/${id}`)
+    setDocs(p => p.filter(d => d.id !== id))
   }
 
   return (
@@ -85,11 +133,9 @@ export function AdminDocumentos() {
           <p className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">Administración</p>
           <h1 className="text-base font-semibold text-gray-900 mt-0.5">Documentos Institucionales</h1>
         </div>
-        <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-semibold">CM</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        {/* Table card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
           {/* Toolbar */}
@@ -140,20 +186,27 @@ export function AdminDocumentos() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr><td colSpan={6} className="py-16 text-center text-sm text-gray-400">Cargando documentos...</td></tr>
+              ) : error ? (
+                <tr><td colSpan={6} className="py-16 text-center text-sm text-red-500">{error}</td></tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
                     <svg className="w-10 h-10 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" strokeWidth="1.4" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <p className="text-gray-400 text-sm font-medium">No se encontraron documentos</p>
+                    <p className="text-gray-300 text-xs mt-1">
+                      {docs.length === 0 ? 'Sube tu primer documento con el botón de arriba.' : 'Intenta ajustar los filtros.'}
+                    </p>
                   </td>
                 </tr>
               ) : filtered.map(d => {
-                const ext  = getExt(d.archivo)
-                const tc   = tipoConfig[d.tipo]
-                const es   = extStyle[ext] ?? { bg: 'bg-gray-50', text: 'text-gray-400' }
-                const fecha = new Date(d.fecha + 'T00:00:00').toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
+                const ext   = getExt(d.archivo_nombre)
+                const tc    = tipoConfig[d.tipo]
+                const es    = extStyle[ext] ?? { bg: 'bg-gray-50', text: 'text-gray-400' }
+                const fecha = new Date(d.created_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
                 return (
                   <tr key={d.id} className="border-b border-gray-100 last:border-0 hover:bg-blue-50/30 transition-colors">
                     <td className="px-5 py-4">
@@ -163,7 +216,7 @@ export function AdminDocumentos() {
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900">{d.nombre}</p>
-                          {d.descripcion && <p className="text-gray-400 text-xs mt-0.5 line-clamp-1 max-w-xs">{d.descripcion}</p>}
+                          <p className="text-gray-400 text-xs mt-0.5">{d.archivo_nombre} · {formatBytes(d.archivo_tamanio)}</p>
                         </div>
                       </div>
                     </td>
@@ -186,23 +239,23 @@ export function AdminDocumentos() {
                           </span>
                       }
                     </td>
-                    <td className="px-5 py-4 text-gray-600 text-sm">{d.subidoPor}</td>
+                    <td className="px-5 py-4 text-gray-600 text-sm">{d.autor?.name ?? '—'}</td>
                     <td className="px-5 py-4 text-gray-400 text-xs tabular-nums">{fecha}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => alert(`Descargando: ${d.archivo}`)}
+                        <a href={d.archivo_url} target="_blank" rel="noopener noreferrer" download={d.archivo_nombre}
                           className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition" title="Descargar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
-                        </button>
-                        <button onClick={() => openEdit(d.id)}
+                        </a>
+                        <button onClick={() => openEdit(d)}
                           className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition" title="Editar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
-                        <button onClick={() => setDocs(p => p.filter(x => x.id !== d.id))}
+                        <button onClick={() => remove(d.id)}
                           className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition" title="Eliminar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -217,7 +270,7 @@ export function AdminDocumentos() {
           </table>
 
           {/* Footer */}
-          <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
+          <div className="border-t border-gray-100 px-5 py-3">
             <p className="text-xs text-gray-400">
               Mostrando <span className="font-semibold text-gray-600">{filtered.length}</span> de <span className="font-semibold text-gray-600">{docs.length}</span> documentos
             </p>
@@ -243,6 +296,15 @@ export function AdminDocumentos() {
             </div>
 
             <div className="px-6 py-5 flex flex-col gap-5">
+              {formError && (
+                <div className="flex items-start gap-2.5 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  {formError}
+                </div>
+              )}
+
               <div>
                 <label className={labelCls}>Nombre del documento</label>
                 <input value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
@@ -274,21 +336,23 @@ export function AdminDocumentos() {
                   className={`${inputCls} resize-none`} />
               </div>
               <div>
-                <label className={labelCls}>Archivo</label>
+                <label className={labelCls}>
+                  Archivo {editingId !== null && <span className="text-gray-400 font-normal">(dejar vacío para no cambiar)</span>}
+                </label>
                 <div onClick={() => fileRef.current?.click()}
                   className="border-2 border-dashed border-gray-300 rounded-xl px-4 py-7 text-center hover:border-blue-400 hover:bg-blue-50/30 transition cursor-pointer group">
                   <svg className="w-7 h-7 mx-auto mb-2 text-gray-300 group-hover:text-blue-400 transition" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
-                  {form.archivo
-                    ? <p className="text-blue-600 text-sm font-semibold">{form.archivo}</p>
+                  {selectedFile
+                    ? <p className="text-blue-600 text-sm font-semibold">{selectedFile.name} <span className="text-gray-400 font-normal">({formatBytes(selectedFile.size)})</span></p>
                     : <>
                         <p className="text-sm text-gray-500 group-hover:text-blue-600 transition font-medium">Haz clic para seleccionar</p>
                         <p className="text-xs text-gray-400 mt-0.5">o arrastra un archivo aquí</p>
                       </>
                   }
                   <input ref={fileRef} type="file" accept=".pdf,.docx,.xlsx,.doc,.xls" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) setForm(p => ({ ...p, archivo: f.name })) }} />
+                    onChange={e => setSelectedFile(e.target.files?.[0] ?? null)} />
                 </div>
               </div>
             </div>
@@ -298,9 +362,9 @@ export function AdminDocumentos() {
                 className="px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
                 Cancelar
               </button>
-              <button onClick={save}
-                className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                {editingId !== null ? 'Guardar cambios' : 'Subir documento'}
+              <button onClick={save} disabled={saving}
+                className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold transition shadow-sm">
+                {saving ? 'Guardando...' : (editingId !== null ? 'Guardar cambios' : 'Subir documento')}
               </button>
             </div>
           </div>

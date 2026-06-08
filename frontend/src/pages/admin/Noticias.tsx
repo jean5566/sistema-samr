@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import api from '../../lib/api'
 
 interface Noticia {
   id: number
@@ -7,42 +8,50 @@ interface Noticia {
   estado: 'publicado' | 'borrador'
   fecha: string
   descripcion: string
-  imagen: string
+  imagen: string | null
+  destacada: boolean
 }
 
 const catConfig: Record<string, { label: string; cls: string }> = {
-  noticia:  { label: 'Noticia',             cls: 'border-blue-200 bg-blue-50 text-blue-700'     },
+  noticia:  { label: 'Noticia',             cls: 'border-blue-200 bg-blue-50 text-blue-700'      },
   evento:   { label: 'Evento Académico',    cls: 'border-indigo-200 bg-indigo-50 text-indigo-700' },
   congreso: { label: 'Congreso',            cls: 'border-purple-200 bg-purple-50 text-purple-700' },
-  feria:    { label: 'Feria Tecnológica',   cls: 'border-cyan-200 bg-cyan-50 text-cyan-700'      },
-  aviso:    { label: 'Aviso Institucional', cls: 'border-amber-200 bg-amber-50 text-amber-700'   },
+  feria:    { label: 'Feria Tecnológica',   cls: 'border-cyan-200 bg-cyan-50 text-cyan-700'       },
+  aviso:    { label: 'Aviso Institucional', cls: 'border-amber-200 bg-amber-50 text-amber-700'    },
 }
 
 const catBg: Record<string, string> = {
   noticia: 'bg-blue-500', evento: 'bg-indigo-500', congreso: 'bg-purple-500', feria: 'bg-cyan-500', aviso: 'bg-amber-400',
 }
 
-const initialNoticias: Noticia[] = [
-  { id: 1, titulo: 'Convocatoria al Congreso TIC 2026',          categoria: 'congreso', estado: 'publicado', fecha: '2026-04-15', descripcion: 'Inscripciones abiertas para el congreso anual de Tecnologías de la Información.',       imagen: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80' },
-  { id: 2, titulo: 'Nuevas becas disponibles para estudiantes',   categoria: 'aviso',    estado: 'publicado', fecha: '2026-03-20', descripcion: 'La carrera abre convocatoria para becas de excelencia académica del período 2026-I.',    imagen: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80' },
-  { id: 3, titulo: 'Feria de Innovación Tecnológica UNESUM',      categoria: 'feria',    estado: 'publicado', fecha: '2026-05-10', descripcion: 'Exhibición de proyectos desarrollados por estudiantes de la carrera.',                  imagen: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80' },
-  { id: 4, titulo: 'Resultados del proyecto IA Educativa',        categoria: 'noticia',  estado: 'publicado', fecha: '2026-02-28', descripcion: 'El equipo de investigación presenta los resultados del estudio sobre IA.',              imagen: '' },
-  { id: 5, titulo: 'Semana de inducción para estudiantes nuevos', categoria: 'evento',   estado: 'borrador',  fecha: '2026-04-07', descripcion: 'Actividades de bienvenida y charlas para estudiantes que ingresan al primer semestre.', imagen: '' },
-]
-
-const emptyForm = { titulo: '', categoria: 'noticia' as Noticia['categoria'], estado: 'publicado' as Noticia['estado'], fecha: '', descripcion: '', imagen: '' }
+const emptyForm = {
+  titulo: '', categoria: 'noticia' as Noticia['categoria'],
+  estado: 'borrador' as Noticia['estado'], fecha: '', descripcion: '', imagen: '',
+}
 
 const inputCls = 'w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder:text-gray-400'
 const labelCls = 'block text-sm font-medium text-gray-700 mb-2'
 
 export function AdminNoticias() {
-  const [noticias, setNoticias]           = useState<Noticia[]>(initialNoticias)
-  const [search, setSearch]               = useState('')
-  const [filterCat, setFilterCat]         = useState('')
-  const [filterEstado, setFilterEstado]   = useState('')
-  const [modalOpen, setModalOpen]         = useState(false)
-  const [editingId, setEditingId]         = useState<number | null>(null)
-  const [form, setForm]                   = useState(emptyForm)
+  const [noticias, setNoticias]         = useState<Noticia[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+  const [search, setSearch]             = useState('')
+  const [filterCat, setFilterCat]       = useState('')
+  const [filterEstado, setFilterEstado] = useState('')
+  const [modalOpen, setModalOpen]       = useState(false)
+  const [editingId, setEditingId]       = useState<number | null>(null)
+  const [form, setForm]                 = useState(emptyForm)
+  const [saving, setSaving]             = useState(false)
+  const [formError, setFormError]       = useState<string | null>(null)
+  const [destacandoId, setDestacandoId] = useState<number | null>(null)
+
+  useEffect(() => {
+    api.get<Noticia[]>('/noticias/todas')
+      .then(res => setNoticias(res.data))
+      .catch(() => setError('No se pudo cargar las publicaciones.'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filtered = useMemo(() =>
     noticias.filter(n =>
@@ -51,21 +60,52 @@ export function AdminNoticias() {
       (filterEstado ? n.estado    === filterEstado : true)
     ), [noticias, search, filterCat, filterEstado])
 
-  function openNew()  { setEditingId(null); setForm(emptyForm); setModalOpen(true) }
-  function openEdit(id: number) {
-    const n = noticias.find(x => x.id === id)!
-    setEditingId(id)
-    setForm({ titulo: n.titulo, categoria: n.categoria, estado: n.estado, fecha: n.fecha, descripcion: n.descripcion, imagen: n.imagen })
+  function openNew() { setEditingId(null); setForm(emptyForm); setFormError(null); setModalOpen(true) }
+  function openEdit(n: Noticia) {
+    setEditingId(n.id)
+    setForm({ titulo: n.titulo, categoria: n.categoria, estado: n.estado, fecha: n.fecha, descripcion: n.descripcion, imagen: n.imagen ?? '' })
+    setFormError(null)
     setModalOpen(true)
   }
-  function save() {
-    if (!form.titulo || !form.fecha) return
-    if (editingId !== null) {
-      setNoticias(p => p.map(n => n.id === editingId ? { ...n, ...form } : n))
-    } else {
-      setNoticias(p => [{ id: Date.now(), ...form }, ...p])
+
+  async function save() {
+    if (!form.titulo.trim() || !form.fecha || !form.descripcion.trim()) {
+      setFormError('Título, fecha y descripción son obligatorios.')
+      return
     }
-    setModalOpen(false)
+    setSaving(true)
+    setFormError(null)
+    try {
+      const payload = { ...form, imagen: form.imagen || null }
+      if (editingId !== null) {
+        const { data } = await api.put<Noticia>(`/noticias/${editingId}`, payload)
+        setNoticias(p => p.map(n => n.id === editingId ? data : n))
+      } else {
+        const { data } = await api.post<Noticia>('/noticias', payload)
+        setNoticias(p => [data, ...p])
+      }
+      setModalOpen(false)
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message ?? 'Error al guardar la publicación.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function toggleDestacada(n: Noticia) {
+    setDestacandoId(n.id)
+    try {
+      const { data } = await api.post<Noticia>(`/noticias/${n.id}/destacar`)
+      // La API quita la destacada anterior y asigna la nueva (o quita si ya era la misma)
+      setNoticias(p => p.map(x => ({ ...x, destacada: x.id === n.id ? data.destacada : false })))
+    } finally {
+      setDestacandoId(null)
+    }
+  }
+
+  async function remove(id: number) {
+    await api.delete(`/noticias/${id}`)
+    setNoticias(p => p.filter(n => n.id !== id))
   }
 
   return (
@@ -76,7 +116,12 @@ export function AdminNoticias() {
           <p className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">Administración</p>
           <h1 className="text-base font-semibold text-gray-900 mt-0.5">Noticias y Eventos</h1>
         </div>
-        <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-semibold">CM</div>
+        {noticias.some(n => n.destacada) && (
+          <span className="inline-flex items-center gap-1.5 border border-amber-200 bg-amber-50 text-amber-700 rounded-full px-3 py-1 text-xs font-medium">
+            <svg className="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Destacada activa
+          </span>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
@@ -93,7 +138,7 @@ export function AdminNoticias() {
           </div>
 
           <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition select-styled">
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
             <option value="">Todas las categorías</option>
             <option value="noticia">Noticia</option>
             <option value="evento">Evento Académico</option>
@@ -103,7 +148,7 @@ export function AdminNoticias() {
           </select>
 
           <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition select-styled">
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
             <option value="">Todos los estados</option>
             <option value="publicado">Publicado</option>
             <option value="borrador">Borrador</option>
@@ -121,27 +166,49 @@ export function AdminNoticias() {
           </div>
         </div>
 
-        {/* Cards grid */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm py-20 text-center text-sm text-gray-400">
+            Cargando publicaciones...
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm py-20 text-center text-sm text-red-500">
+            {error}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm py-20 text-center">
             <svg className="w-10 h-10 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" strokeWidth="1.4" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
             </svg>
             <p className="text-gray-400 text-sm font-medium">No se encontraron publicaciones</p>
+            <p className="text-gray-300 text-xs mt-1">
+              {noticias.length === 0 ? 'Crea tu primera publicación con el botón de arriba.' : 'Intenta ajustar los filtros.'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map(n => {
               const cat = catConfig[n.categoria]
-              const fechaFormato = new Date(n.fecha + 'T00:00:00').toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
+              const fechaFormato = new Date(n.fecha.slice(0, 10) + 'T12:00:00').toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
               return (
                 <div key={n.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  {n.imagen
-                    ? <div className="h-44 bg-cover bg-center" style={{ backgroundImage: `url('${n.imagen}')` }} />
-                    : <div className={`h-44 ${catBg[n.categoria]} flex items-center justify-center`}>
-                        <span className="text-white/30 text-6xl font-black">{cat.label[0]}</span>
+
+                  {/* Imagen o placeholder */}
+                  <div className="relative">
+                    {n.imagen
+                      ? <div className="h-44 bg-cover bg-center" style={{ backgroundImage: `url('${n.imagen}')` }} />
+                      : <div className={`h-44 ${catBg[n.categoria]} flex items-center justify-center`}>
+                          <span className="text-white/30 text-6xl font-black">{cat.label[0]}</span>
+                        </div>
+                    }
+                    {/* Badge destacada sobre la imagen */}
+                    {n.destacada && (
+                      <div className="absolute top-3 left-3 inline-flex items-center gap-1 bg-amber-400 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                        <svg className="w-3 h-3 fill-white" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        Destacada
                       </div>
-                  }
+                    )}
+                  </div>
+
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`inline-flex items-center border rounded-full px-2.5 py-0.5 text-xs font-medium ${cat.cls}`}>{cat.label}</span>
@@ -159,12 +226,28 @@ export function AdminNoticias() {
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
                       <span className="text-[11px] text-gray-400">{fechaFormato}</span>
                       <div className="flex items-center gap-0.5">
-                        <button onClick={() => openEdit(n.id)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition">
+
+                        {/* Botón destacar */}
+                        <button
+                          onClick={() => toggleDestacada(n)}
+                          disabled={destacandoId === n.id}
+                          title={n.destacada ? 'Quitar destacada' : 'Marcar como destacada en el inicio'}
+                          className={`p-2 rounded-lg transition disabled:opacity-40 ${
+                            n.destacada
+                              ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
+                              : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'
+                          }`}>
+                          <svg className={`w-4 h-4 ${n.destacada ? 'fill-amber-400' : 'fill-none'}`} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                        </button>
+
+                        <button onClick={() => openEdit(n)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition" title="Editar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
-                        <button onClick={() => setNoticias(p => p.filter(x => x.id !== n.id))} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition">
+                        <button onClick={() => remove(n.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition" title="Eliminar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
@@ -197,6 +280,14 @@ export function AdminNoticias() {
             </div>
 
             <div className="overflow-y-auto px-6 py-5 flex flex-col gap-5">
+              {formError && (
+                <div className="flex items-start gap-2.5 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  {formError}
+                </div>
+              )}
               <div>
                 <label className={labelCls}>Título</label>
                 <input value={form.titulo} onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))}
@@ -216,8 +307,8 @@ export function AdminNoticias() {
                 <div>
                   <label className={labelCls}>Estado</label>
                   <select value={form.estado} onChange={e => setForm(f => ({ ...f, estado: e.target.value as Noticia['estado'] }))} className={`${inputCls} select-styled`}>
-                    <option value="publicado">Publicado</option>
                     <option value="borrador">Borrador</option>
+                    <option value="publicado">Publicado</option>
                   </select>
                 </div>
               </div>
@@ -243,9 +334,9 @@ export function AdminNoticias() {
                 className="px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
                 Cancelar
               </button>
-              <button onClick={save}
-                className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                {editingId !== null ? 'Guardar cambios' : 'Publicar'}
+              <button onClick={save} disabled={saving}
+                className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold transition shadow-sm">
+                {saving ? 'Guardando...' : (editingId !== null ? 'Guardar cambios' : 'Publicar')}
               </button>
             </div>
           </div>

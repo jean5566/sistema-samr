@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import api from '../../lib/api'
+import { useAuth } from '../../lib/AuthContext'
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -67,10 +69,12 @@ function SectionCard({ title, desc, children, onSave, saveLabel = 'Guardar cambi
 }
 
 export function AdminConfiguracion() {
-  const [nombre,       setNombre]       = useState('Carlos Mendoza')
-  const [correo,       setCorreo]       = useState('admin@unesum.edu.ec')
+  const { user, setUser }              = useAuth()
+  const [nombre,       setNombre]       = useState(user?.name  ?? '')
+  const [correo,       setCorreo]       = useState(user?.email ?? '')
   const [passNueva,    setPassNueva]    = useState('')
   const [passConf,     setPassConf]     = useState('')
+  const [saving,       setSaving]       = useState(false)
   const [institucion,  setInstitucion]  = useState('Universidad Estatal del Sur de Manabí')
   const [carrera,      setCarrera]      = useState('Tecnologías de la Información')
   const [periodo,      setPeriodo]      = useState('2026-1')
@@ -89,10 +93,22 @@ export function AdminConfiguracion() {
     }
   }, [toast.visible])
 
-  function guardarPerfil() {
+  async function guardarPerfil() {
     if (passNueva && passNueva !== passConf) { showToast('Las contraseñas no coinciden'); return }
-    showToast('Perfil actualizado correctamente')
-    setPassNueva(''); setPassConf('')
+    if (!user) return
+    setSaving(true)
+    try {
+      const payload: Record<string, string> = { name: nombre, email: correo }
+      if (passNueva) payload.password = passNueva
+      const { data } = await api.put(`/users/${user.id}`, payload)
+      setUser({ ...user, name: data.name, email: data.email })
+      showToast('Perfil actualizado correctamente')
+      setPassNueva(''); setPassConf('')
+    } catch {
+      showToast('Error al guardar los cambios')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -103,14 +119,13 @@ export function AdminConfiguracion() {
           <p className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">Administración</p>
           <h1 className="text-base font-semibold text-gray-900 mt-0.5">Configuración</h1>
         </div>
-        <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-semibold">CM</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
         <div className="max-w-2xl flex flex-col gap-5">
 
           {/* Perfil */}
-          <SectionCard title="Perfil del administrador" desc="Datos de la cuenta con la que administras el sistema." onSave={guardarPerfil}>
+          <SectionCard title="Perfil del administrador" desc="Datos de la cuenta con la que administras el sistema." onSave={guardarPerfil} saveLabel={saving ? 'Guardando...' : 'Guardar cambios'}>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Nombre completo</label>

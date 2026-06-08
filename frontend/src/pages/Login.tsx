@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../lib/AuthContext'
 
 type Role = 'admin' | 'docente' | 'estudiante'
 
@@ -12,21 +13,36 @@ const roleOptions = [
 const destinos: Record<Role, string> = {
   admin:      '/dashboard/admin',
   docente:    '/dashboard/docente/perfil',
-  estudiante: '/dashboard/estudiante/docentes',
+  estudiante: '/dashboard/estudiante',
 }
 
 export function Login() {
   const navigate = useNavigate()
-  const [role, setRole]       = useState<Role | null>(null)
-  const [email, setEmail]     = useState('')
-  const [pass, setPass]       = useState('')
+  const { login } = useAuth()
+  const [role, setRole]         = useState<Role | null>(null)
+  const [email, setEmail]       = useState('')
+  const [pass, setPass]         = useState('')
   const [showPass, setShowPass] = useState(false)
-  const [error, setError]     = useState('')
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
 
-  function login() {
+  async function handleLogin() {
     if (!role) { setError('Selecciona tu tipo de usuario para continuar.'); return }
+    if (!email || !pass) { setError('Ingresa tu correo y contraseña.'); return }
     setError('')
-    navigate(destinos[role])
+    setLoading(true)
+    try {
+      const user = await login(email, pass)
+      if (user.role !== role) {
+        setError('El rol seleccionado no coincide con tu cuenta.')
+        return
+      }
+      navigate(destinos[user.role])
+    } catch {
+      setError('Correo o contraseña incorrectos.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -96,7 +112,7 @@ export function Login() {
               </svg>
             </div>
             <input type={showPass ? 'text' : 'password'} value={pass} onChange={e => setPass(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && login()} placeholder="••••••••"
+              onKeyDown={e => e.key === 'Enter' && handleLogin()} placeholder="••••••••"
               className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder-gray-300" />
             <button type="button" onClick={() => setShowPass(p => !p)}
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-300 hover:text-gray-500 transition">
@@ -111,9 +127,9 @@ export function Login() {
           <p className="text-red-500 text-xs text-center mb-4 bg-red-50 py-2 px-3 rounded-xl border border-red-100">{error}</p>
         )}
 
-        <button onClick={login}
-          className="w-full bg-blue-800 hover:bg-blue-900 active:scale-95 text-white font-bold py-3 rounded-xl transition-all duration-200 text-sm shadow-md hover:shadow-lg">
-          Ingresar
+        <button onClick={handleLogin} disabled={loading}
+          className="w-full bg-blue-800 hover:bg-blue-900 active:scale-95 text-white font-bold py-3 rounded-xl transition-all duration-200 text-sm shadow-md hover:shadow-lg disabled:opacity-60">
+          {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
 
         <p className="text-center text-gray-400 text-xs mt-5">

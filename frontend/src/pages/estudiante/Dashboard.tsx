@@ -24,7 +24,6 @@ export function EstudianteDashboard() {
           <p className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">Estudiante</p>
           <h1 className="text-base font-semibold text-gray-900 mt-0.5">Panel principal</h1>
         </div>
-        <div className="w-8 h-8 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-semibold">JG</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">

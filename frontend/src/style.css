@@ -21,6 +21,14 @@ html {
   scroll-padding-top: 100px;
 }
 
+/* NProgress — color de la barra al tema azul */
+#nprogress .bar { background: #3d6db5 !important; height: 3px !important; }
+#nprogress .peg { box-shadow: 0 0 10px #3d6db5, 0 0 5px #3d6db5 !important; }
+#nprogress .spinner-icon {
+  border-top-color: #3d6db5 !important;
+  border-left-color: #3d6db5 !important;
+}
+
 .select-styled {
   appearance: none;
   -webkit-appearance: none;

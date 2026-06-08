@@ -1,7 +1,48 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import api from '../lib/api'
+
+interface Noticia {
+  id: number
+  titulo: string
+  categoria: string
+  fecha: string
+  descripcion: string
+  imagen: string | null
+  destacada: boolean
+}
+
+const catLabel: Record<string, string> = {
+  noticia:  'Noticia',
+  evento:   'Evento Académico',
+  congreso: 'Congreso',
+  feria:    'Feria Tecnológica',
+  aviso:    'Aviso Institucional',
+}
+
+const catBg: Record<string, string> = {
+  noticia:  'bg-blue-500',
+  evento:   'bg-indigo-500',
+  congreso: 'bg-purple-500',
+  feria:    'bg-cyan-500',
+  aviso:    'bg-amber-400',
+}
+
+function fechaCorta(raw: string) {
+  return new Date(raw.slice(0, 10) + 'T12:00:00')
+    .toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
+}
 
 export function Landing() {
   const navigate = useNavigate()
+  const [noticias, setNoticias] = useState<Noticia[]>([])
+
+  useEffect(() => {
+    api.get<Noticia[]>('/noticias').then(res => setNoticias(res.data))
+  }, [])
+
+  const featured  = noticias.find(n => n.destacada) ?? noticias[0] ?? null
+  const secondary = noticias.filter(n => n.id !== featured?.id).slice(0, 2)
 
   return (
     <div className="min-h-screen bg-white">
@@ -32,39 +73,64 @@ export function Landing() {
       <section className="bg-gray-50 pb-14 pt-6">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 border-b-2 border-blue-100 pb-2 text-blue-900">Noticias Destacadas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-md group cursor-pointer" style={{ minHeight: '260px' }}
-              onClick={() => navigate('/noticias')}>
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=80')" }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute top-4 left-4">
-                <span className="text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide bg-blue-500">Destacado</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-blue-300">Eventos · 1 Abr 2026</p>
-                <h3 className="text-white font-bold text-2xl leading-tight">Convocatoria a Congreso TIC 2026</h3>
-                <p className="text-white/80 text-sm mt-2">No te pierdas el evento anual de Tecnologías de la Información. Inscripciones abiertas.</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-6">
-              {[
-                { img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80', cat: 'Académico', date: 'Mar 2026', title: 'Nuevas becas disponibles para estudiantes de TI' },
-                { img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80', cat: 'Investigación', date: 'Feb 2026', title: 'Publicación de resultados del proyecto IA Educativa' },
-              ].map(n => (
-                <div key={n.title} className="relative rounded-2xl overflow-hidden shadow-md group cursor-pointer flex-1" style={{ minHeight: '118px' }}
-                  onClick={() => navigate('/noticias')}>
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                    style={{ backgroundImage: `url('${n.img}')` }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-0.5">{n.cat} · {n.date}</p>
-                    <h4 className="text-white font-bold text-sm leading-tight">{n.title}</h4>
+
+          {noticias.length === 0 ? (
+            <div className="text-center py-16 text-gray-400 text-sm">No hay noticias publicadas aún.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              {/* Noticia principal */}
+              {featured && (
+                <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-md group cursor-pointer"
+                  style={{ minHeight: '260px' }} onClick={() => navigate('/noticias')}>
+                  {featured.imagen
+                    ? <>
+                        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                          style={{ backgroundImage: `url('${featured.imagen}')` }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                      </>
+                    : <div className={`absolute inset-0 ${catBg[featured.categoria] ?? 'bg-blue-500'} group-hover:brightness-110 transition`} />
+                  }
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide bg-blue-500">Destacado</span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+                    <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-blue-300">
+                      {catLabel[featured.categoria] ?? featured.categoria} · {fechaCorta(featured.fecha)}
+                    </p>
+                    <h3 className="text-white font-bold text-2xl leading-tight">{featured.titulo}</h3>
+                    <p className="text-white/80 text-sm mt-2 line-clamp-2">{featured.descripcion}</p>
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Noticias secundarias */}
+              {secondary.length > 0 && (
+                <div className="flex flex-col gap-6">
+                  {secondary.map(n => (
+                    <div key={n.id} className="relative rounded-2xl overflow-hidden shadow-md group cursor-pointer flex-1"
+                      style={{ minHeight: '118px' }} onClick={() => navigate('/noticias')}>
+                      {n.imagen
+                        ? <>
+                            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                              style={{ backgroundImage: `url('${n.imagen}')` }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                          </>
+                        : <div className={`absolute inset-0 ${catBg[n.categoria] ?? 'bg-blue-500'} group-hover:brightness-110 transition`} />
+                      }
+                      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                        <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-0.5">
+                          {catLabel[n.categoria] ?? n.categoria} · {fechaCorta(n.fecha)}
+                        </p>
+                        <h4 className="text-white font-bold text-sm leading-tight">{n.titulo}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
             </div>
-          </div>
+          )}
         </div>
       </section>
 
