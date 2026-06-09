@@ -1,0 +1,47 @@
+<?php
+
+return [
+    'required'  => 'El campo :attribute es obligatorio.',
+    'string'    => 'El campo :attribute debe ser texto.',
+    'max'       => [
+        'string' => 'El campo :attribute no puede tener más de :max caracteres.',
+        'file'   => 'El archivo :attribute no puede pesar más de :max kilobytes.',
+    ],
+    'min'       => [
+        'string' => 'El campo :attribute debe tener al menos :min caracteres.',
+    ],
+    'email'     => 'El campo :attribute debe ser un correo válido.',
+    'unique'    => 'El :attribute ya está registrado.',
+    'confirmed' => 'La confirmación de :attribute no coincide.',
+    'in'        => 'El valor seleccionado en :attribute no es válido.',
+    'exists'    => 'El :attribute seleccionado no existe.',
+    'date'      => 'El campo :attribute no es una fecha válida.',
+    'nullable'  => '',
+    'url'       => 'El campo :attribute debe ser una URL válida.',
+    'file'      => 'El campo :attribute debe ser un archivo.',
+    'mimes'     => 'El archivo :attribute debe ser de tipo: :values.',
+    'mimetypes' => 'El archivo :attribute debe ser de tipo: :values.',
+    'numeric'   => 'El campo :attribute debe ser un número.',
+    'integer'   => 'El campo :attribute debe ser un número entero.',
+    'boolean'   => 'El campo :attribute debe ser verdadero o falso.',
+    'sometimes' => '',
+
+    'attributes' => [
+        'nombre'           => 'nombre',
+        'titulo'           => 'título',
+        'descripcion'      => 'descripción',
+        'categoria'        => 'categoría',
+        'estado'           => 'estado',
+        'fecha'            => 'fecha',
+        'fecha_realizacion'=> 'fecha de realización',
+        'imagen'           => 'imagen',
+        'tipo'             => 'tipo',
+        'acceso'           => 'acceso',
+        'archivo'          => 'archivo',
+        'color'            => 'color',
+        'modulo'           => 'módulo',
+        'email'            => 'correo electrónico',
+        'password'         => 'contraseña',
+        'role'             => 'rol',
+    ],
+];

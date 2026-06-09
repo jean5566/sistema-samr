@@ -12,9 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('titulo');
-            $table->enum('categoria', ['noticia', 'evento', 'congreso', 'feria', 'aviso'])->default('noticia');
+            $table->string('categoria', 100)->default('noticia');
             $table->enum('estado', ['publicado', 'borrador'])->default('borrador');
             $table->date('fecha');
+            $table->date('fecha_realizacion')->nullable();
             $table->text('descripcion');
             $table->string('imagen')->nullable();
             $table->timestamps();

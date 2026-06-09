@@ -16,6 +16,11 @@ class Docente extends Model
         'telefono',
         'bio',
         'foto',
+        'permite_edicion_estudiantes',
+    ];
+
+    protected $casts = [
+        'permite_edicion_estudiantes' => 'boolean',
     ];
 
     protected $appends = ['foto_url'];

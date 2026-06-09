@@ -12,6 +12,7 @@ class Noticia extends Model
         'categoria',
         'estado',
         'fecha',
+        'fecha_realizacion',
         'descripcion',
         'imagen',
         'destacada',
@@ -20,7 +21,8 @@ class Noticia extends Model
     protected function casts(): array
     {
         return [
-            'fecha'      => 'date',
+            'fecha'             => 'date',
+            'fecha_realizacion' => 'date',
             'destacada'  => 'boolean',
         ];
     }

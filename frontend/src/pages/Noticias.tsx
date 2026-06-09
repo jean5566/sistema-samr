@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
 
 interface Noticia {
@@ -6,6 +7,7 @@ interface Noticia {
   titulo: string
   categoria: string
   fecha: string
+  fecha_realizacion: string | null
   descripcion: string
   imagen: string | null
 }
@@ -41,6 +43,7 @@ function fechaFormato(raw: string) {
 }
 
 export function NoticiasPage() {
+  const navigate = useNavigate()
   const [noticias, setNoticias] = useState<Noticia[]>([])
   const [loading, setLoading]   = useState(true)
   const [cat, setCat]           = useState('')
@@ -84,10 +87,11 @@ export function NoticiasPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(n => (
-              <div key={n.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+              <div key={n.id} onClick={() => navigate(`/noticias/${n.id}`)}
+                className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group">
                 <div className="h-44 overflow-hidden relative">
                   {n.imagen
-                    ? <img src={n.imagen} alt={n.titulo} className="w-full h-full object-cover" />
+                    ? <img src={n.imagen} alt={n.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     : <div className={`w-full h-full flex items-center justify-center ${CAT_BG[n.categoria] ?? 'bg-blue-400'}`}>
                         <span className="text-white text-5xl font-bold opacity-40">{n.titulo[0]}</span>
                       </div>
@@ -102,6 +106,17 @@ export function NoticiasPage() {
                   </div>
                   <h3 className="text-sm font-bold text-gray-900 leading-snug mb-2">{n.titulo}</h3>
                   <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">{n.descripcion}</p>
+                  {n.fecha_realizacion && (
+                    <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
+                      <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[11px] text-indigo-600 font-medium">Se realiza el {fechaFormato(n.fecha_realizacion)}</span>
+                    </div>
+                  )}
+                  <div className="mt-3 pt-2">
+                    <span className="text-xs text-blue-600 font-semibold group-hover:underline">Más información →</span>
+                  </div>
                 </div>
               </div>
             ))}

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import api from '../lib/api'
 
 interface Docente {
   id: number
   nombre: string
-  titulo: string
-  area: string
+  titulo: string | null
+  area: string | null
   email: string
   foto_url: string | null
 }
@@ -25,19 +26,22 @@ function iniciales(nombre: string) {
 }
 
 export function DocentesPage() {
+  const location                = useLocation()
   const [docentes, setDocentes] = useState<Docente[]>([])
   const [loading, setLoading]   = useState(true)
   const [search, setSearch]     = useState('')
 
   useEffect(() => {
-    api.get('/docentes')
+    setLoading(true)
+    api.get('/docentes', { headers: { 'Cache-Control': 'no-cache' } })
       .then(res => setDocentes(res.data))
       .finally(() => setLoading(false))
-  }, [])
+  }, [location.key])
 
+  const q = search.toLowerCase()
   const filtered = docentes.filter(d =>
-    d.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    d.area.toLowerCase().includes(search.toLowerCase())
+    d.nombre.toLowerCase().includes(q) ||
+    (d.area ?? '').toLowerCase().includes(q)
   )
 
   return (
@@ -72,8 +76,8 @@ export function DocentesPage() {
                   : <span className="text-white text-2xl font-bold">{iniciales(d.nombre)}</span>}
               </div>
               <h3 className="text-sm font-bold text-gray-900 leading-snug">{d.nombre}</h3>
-              <p className="text-xs text-gray-400 mt-1">{d.titulo}</p>
-              <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{d.area}</span>
+              {d.titulo && <p className="text-xs text-gray-400 mt-1">{d.titulo}</p>}
+              {d.area && <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{d.area}</span>}
               <a href={`mailto:${d.email}`} className="block text-xs text-blue-600 hover:underline mt-3 truncate">{d.email}</a>
             </div>
           ))}

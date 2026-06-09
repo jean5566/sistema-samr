@@ -26,6 +26,15 @@ class NoticiaController extends Controller
         return response()->json($noticias);
     }
 
+    public function show(Noticia $noticia): JsonResponse
+    {
+        if ($noticia->estado !== 'publicado') {
+            return response()->json(['message' => 'No encontrado.'], 404);
+        }
+
+        return response()->json($noticia);
+    }
+
     public function store(Request $request): JsonResponse
     {
         if ($request->user()->role !== 'admin') {
@@ -34,11 +43,12 @@ class NoticiaController extends Controller
 
         $data = $request->validate([
             'titulo'      => 'required|string|max:255',
-            'categoria'   => 'required|in:noticia,evento,congreso,feria,aviso',
+            'categoria'   => 'required|string|max:100',
             'estado'      => 'required|in:publicado,borrador',
-            'fecha'       => 'required|date',
-            'descripcion' => 'required|string',
-            'imagen'      => 'nullable|url|max:500',
+            'fecha'             => 'required|date',
+            'fecha_realizacion' => 'nullable|date',
+            'descripcion'       => 'required|string',
+            'imagen'            => 'nullable|url|max:500',
         ]);
 
         $noticia = Noticia::create([...$data, 'user_id' => $request->user()->id]);
@@ -54,10 +64,11 @@ class NoticiaController extends Controller
 
         $data = $request->validate([
             'titulo'      => 'sometimes|string|max:255',
-            'categoria'   => 'sometimes|in:noticia,evento,congreso,feria,aviso',
+            'categoria'   => 'sometimes|string|max:100',
             'estado'      => 'sometimes|in:publicado,borrador',
-            'fecha'       => 'sometimes|date',
-            'descripcion' => 'sometimes|string',
+            'fecha'             => 'sometimes|date',
+            'fecha_realizacion' => 'nullable|date',
+            'descripcion'       => 'sometimes|string',
             'imagen'      => 'nullable|url|max:500',
         ]);
 

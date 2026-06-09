@@ -2,6 +2,33 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../lib/AuthContext'
 import api from '../../lib/api'
 
+interface DocenteData {
+  id: number
+  nombre: string
+  titulo: string
+  area: string
+  email: string
+  telefono: string | null
+  bio: string | null
+  foto: string | null
+  foto_url: string | null
+  permite_edicion_estudiantes: boolean
+}
+
+function Toast({ msg, visible, ok }: { msg: string; visible: boolean; ok: boolean }) {
+  return (
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${ok ? 'bg-emerald-500' : 'bg-red-500'}`}>
+        {ok
+          ? <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          : <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        }
+      </span>
+      {msg}
+    </div>
+  )
+}
+
 const STORAGE_URL = 'http://127.0.0.1:8000/storage/'
 
 function comprimirImagen(file: File, maxPx = 800, quality = 0.82): Promise<Blob> {
@@ -22,8 +49,8 @@ function comprimirImagen(file: File, maxPx = 800, quality = 0.82): Promise<Blob>
 
 export function DocentePerfil() {
   const { user, setUser } = useAuth()
-  const docente = user?.docente
 
+  const [docente,  setDocente]  = useState<DocenteData | null>(null)
   const [nombre,   setNombre]   = useState('')
   const [correo,   setCorreo]   = useState('')
   const [telefono, setTelefono] = useState('')
@@ -31,41 +58,50 @@ export function DocentePerfil() {
   const [area,     setArea]     = useState('')
   const [bio,      setBio]      = useState('')
   const [foto,     setFoto]     = useState<string | null>(null)
-  const [saved,    setSaved]    = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [saving,   setSaving]   = useState(false)
-  const [error,    setError]    = useState('')
+  const [toast,    setToast]    = useState({ visible: false, msg: '', ok: true })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  function showToast(msg: string, ok = true) { setToast({ visible: true, msg, ok }) }
   useEffect(() => {
-    if (!docente) return
-    setNombre(docente.nombre)
-    setCorreo(docente.email)
-    setTelefono(docente.telefono ?? '')
-    setTitulo(docente.titulo)
-    setArea(docente.area)
-    setBio(docente.bio ?? '')
-    setFoto(docente.foto_url ?? null)
-  }, [docente])
+    if (toast.visible) {
+      const t = setTimeout(() => setToast(p => ({ ...p, visible: false })), 2800)
+      return () => clearTimeout(t)
+    }
+  }, [toast.visible])
+
+  // Siempre carga datos frescos del servidor al montar
+  useEffect(() => {
+    api.get('/me').then(({ data }) => {
+      const d: DocenteData | null = data.docente
+      setDocente(d)
+      if (d) {
+        setNombre(d.nombre)
+        setCorreo(d.email)
+        setTelefono(d.telefono ?? '')
+        setTitulo(d.titulo)
+        setArea(d.area)
+        setBio(d.bio ?? '')
+        setFoto(d.foto_url ?? null)
+      }
+      setUser(data)
+    }).catch(() => {}).finally(() => setFetching(false))
+  }, [])
 
   async function guardar() {
     if (!docente) return
     setSaving(true)
-    setError('')
     try {
       const { data } = await api.put(`/docentes/${docente.id}`, {
-        nombre,
-        email:    correo,
-        telefono,
-        titulo,
-        area,
-        bio,
+        nombre, email: correo, telefono, titulo, area, bio,
       })
+      setDocente(data)
       setUser({ ...user!, docente: data })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2600)
+      showToast('Perfil actualizado correctamente')
     } catch {
-      setError('No se pudieron guardar los cambios.')
+      showToast('No se pudieron guardar los cambios.', false)
     } finally {
       setSaving(false)
     }
@@ -75,7 +111,6 @@ export function DocentePerfil() {
     const file = e.target.files?.[0]
     if (!file || !docente) return
     setFoto(URL.createObjectURL(file))
-    setError('')
     try {
       const blob = await comprimirImagen(file)
       const form = new FormData()
@@ -84,12 +119,15 @@ export function DocentePerfil() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       setFoto(data.foto_url)
-      setUser({ ...user!, docente: { ...docente, foto: data.foto, foto_url: data.foto_url } })
+      const updated = { ...docente, foto: data.foto, foto_url: data.foto_url }
+      setDocente(updated)
+      setUser({ ...user!, docente: updated })
+      showToast('Foto actualizada correctamente')
     } catch (err: any) {
       const msg = err?.response?.data?.errors?.foto?.[0]
         ?? err?.response?.data?.message
         ?? 'No se pudo subir la foto.'
-      setError(msg)
+      showToast(msg, false)
     }
   }
 
@@ -110,7 +148,19 @@ export function DocentePerfil() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="max-w-2xl flex flex-col gap-5">
+        {fetching && (
+          <div className="flex items-center gap-2 text-sm text-gray-400 py-8">
+            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Cargando perfil...
+          </div>
+        )}
+        {!fetching && !docente && (
+          <p className="text-sm text-gray-400 py-8">No se encontró el perfil de docente.</p>
+        )}
+        <div className="max-w-2xl flex flex-col gap-5" style={{ display: fetching || !docente ? 'none' : undefined }}>
 
           {/* Avatar + nombre */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 flex items-center gap-5">
@@ -187,30 +237,19 @@ export function DocentePerfil() {
                 <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none" />
               </div>
-              {error && (
-                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-md px-3 py-2">{error}</p>
-              )}
-              <div className="flex items-center justify-between">
-                {saved && (
-                  <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Cambios guardados
-                  </span>
-                )}
-                <div className="ml-auto">
-                  <button onClick={guardar} disabled={saving}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition disabled:opacity-60">
-                    {saving ? 'Guardando...' : 'Guardar cambios'}
-                  </button>
-                </div>
+              <div className="flex justify-end">
+                <button onClick={guardar} disabled={saving}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition disabled:opacity-60">
+                  {saving ? 'Guardando...' : 'Guardar cambios'}
+                </button>
               </div>
             </div>
           </section>
 
         </div>
       </div>
+
+      <Toast msg={toast.msg} visible={toast.visible} ok={toast.ok} />
     </>
   )
 }

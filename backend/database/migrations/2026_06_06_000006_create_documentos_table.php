@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('nombre');
-            $table->enum('tipo', ['planificacion', 'curriculo', 'reglamento', 'resolucion', 'otro'])->default('otro');
+            $table->string('tipo', 100)->default('otro');
             $table->enum('acceso', ['publico', 'interno'])->default('publico');
             $table->text('descripcion')->nullable();
             $table->string('archivo');

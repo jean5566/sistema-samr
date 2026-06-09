@@ -17,17 +17,15 @@ export function Navbar() {
               <div className="text-sm text-blue-500">de la Información</div>
             </div>
           </button>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/login')}
-              className="border border-gray-400 text-gray-700 px-4 py-1.5 rounded text-sm hover:bg-gray-50 transition"
-            >
-              Iniciar Sesión
-            </button>
-            <button className="bg-blue-800 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-900 transition">
-              Registrarse
-            </button>
-          </div>
+          <button
+            onClick={() => navigate('/login')}
+            className="inline-flex items-center gap-2 bg-transparent hover:bg-blue-50 active:scale-95 text-blue-900 border border-blue-900/30 hover:border-blue-900 text-sm font-semibold px-5 py-2 rounded-xl transition-all duration-200"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+            Iniciar sesión
+          </button>
         </div>
       </nav>
       <nav className="bg-blue-800 text-white text-sm fixed top-16 left-0 right-0 z-40">

@@ -11,6 +11,7 @@ interface Docente {
   bio: string | null
   foto: string | null
   foto_url: string | null
+  permite_edicion_estudiantes: boolean
 }
 
 interface AuthUser {

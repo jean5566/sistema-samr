@@ -1,10 +1,18 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import api from '../../lib/api'
+import { COLOR_OPTIONS, colorBadge, colorDot } from '../../lib/catColors'
+
+interface Categoria {
+  id: number
+  nombre: string
+  slug: string
+  color: string
+}
 
 interface Documento {
   id: number
   nombre: string
-  tipo: 'planificacion' | 'curriculo' | 'reglamento' | 'resolucion' | 'otro'
+  tipo: string
   acceso: 'publico' | 'interno'
   descripcion: string | null
   archivo: string
@@ -13,14 +21,6 @@ interface Documento {
   archivo_url: string
   created_at: string
   autor: { id: number; name: string }
-}
-
-const tipoConfig: Record<string, { label: string; cls: string }> = {
-  planificacion: { label: 'Planificación',  cls: 'border-blue-200 bg-blue-50 text-blue-700'      },
-  curriculo:     { label: 'Rediseño Curr.', cls: 'border-violet-200 bg-violet-50 text-violet-700'  },
-  reglamento:    { label: 'Reglamento',     cls: 'border-amber-200 bg-amber-50 text-amber-700'    },
-  resolucion:    { label: 'Resolución',     cls: 'border-purple-200 bg-purple-50 text-purple-700' },
-  otro:          { label: 'Otro',           cls: 'border-gray-200 bg-gray-50 text-gray-500'        },
 }
 
 const extStyle: Record<string, { bg: string; text: string }> = {
@@ -41,7 +41,7 @@ function formatBytes(bytes: number | null): string {
 }
 
 const emptyForm = {
-  nombre: '', tipo: 'planificacion' as Documento['tipo'],
+  nombre: '', tipo: '',
   acceso: 'publico' as Documento['acceso'], descripcion: '',
 }
 
@@ -50,6 +50,7 @@ const labelCls = 'block text-sm font-medium text-gray-700 mb-2'
 
 export function AdminDocumentos() {
   const [docs, setDocs]                   = useState<Documento[]>([])
+  const [categorias, setCategorias]       = useState<Categoria[]>([])
   const [loading, setLoading]             = useState(true)
   const [error, setError]                 = useState<string | null>(null)
   const [search, setSearch]               = useState('')
@@ -63,12 +64,27 @@ export function AdminDocumentos() {
   const [formError, setFormError]         = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Gestión de categorías
+  const [catModal, setCatModal]           = useState(false)
+  const [catForm, setCatForm]             = useState({ nombre: '', color: 'blue' })
+  const [catSaving, setCatSaving]         = useState(false)
+  const [catError, setCatError]           = useState<string | null>(null)
+  const [editingCatId, setEditingCatId]   = useState<number | null>(null)
+  const [editCatForm, setEditCatForm]     = useState({ nombre: '', color: 'blue' })
+
   useEffect(() => {
-    api.get<Documento[]>('/documentos/todos')
-      .then(res => setDocs(res.data))
-      .catch(() => setError('No se pudo cargar los documentos.'))
+    Promise.all([
+      api.get<Documento[]>('/documentos/todos'),
+      api.get<Categoria[]>('/categorias?modulo=documentos'),
+    ]).then(([d, c]) => {
+      setDocs(d.data)
+      setCategorias(c.data)
+    }).catch(() => setError('No se pudo cargar los documentos.'))
       .finally(() => setLoading(false))
   }, [])
+
+  const catMap = useMemo(() =>
+    Object.fromEntries(categorias.map(c => [c.slug, c])), [categorias])
 
   const filtered = useMemo(() =>
     docs.filter(d =>
@@ -78,12 +94,47 @@ export function AdminDocumentos() {
     ), [docs, search, filterTipo, filterAcceso])
 
   function openNew() {
-    setEditingId(null); setForm(emptyForm); setSelectedFile(null); setFormError(null); setModalOpen(true)
+    setEditingId(null)
+    setForm({ ...emptyForm, tipo: categorias[0]?.slug ?? '' })
+    setSelectedFile(null); setFormError(null); setModalOpen(true)
   }
   function openEdit(d: Documento) {
     setEditingId(d.id)
     setForm({ nombre: d.nombre, tipo: d.tipo, acceso: d.acceso, descripcion: d.descripcion ?? '' })
     setSelectedFile(null); setFormError(null); setModalOpen(true)
+  }
+
+  async function addCat() {
+    if (!catForm.nombre.trim()) { setCatError('El nombre es obligatorio.'); return }
+    setCatSaving(true); setCatError(null)
+    try {
+      const { data } = await api.post<Categoria>('/categorias', { ...catForm, modulo: 'documentos' })
+      setCategorias(p => [...p, data])
+      setCatForm({ nombre: '', color: 'blue' })
+    } catch (e: any) {
+      setCatError(e?.response?.data?.message ?? 'Error al crear la categoría.')
+    } finally {
+      setCatSaving(false)
+    }
+  }
+
+  function startEditCat(c: Categoria) {
+    setEditingCatId(c.id)
+    setEditCatForm({ nombre: c.nombre, color: c.color })
+  }
+
+  async function saveEditCat(id: number) {
+    if (!editCatForm.nombre.trim()) return
+    try {
+      const { data } = await api.put<Categoria>(`/categorias/${id}`, editCatForm)
+      setCategorias(p => p.map(c => c.id === id ? data : c))
+      setEditingCatId(null)
+    } catch {}
+  }
+
+  async function deleteCat(id: number) {
+    await api.delete(`/categorias/${id}`)
+    setCategorias(p => p.filter(c => c.id !== id))
   }
 
   async function save() {
@@ -153,11 +204,7 @@ export function AdminDocumentos() {
             <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition select-styled">
               <option value="">Todas las categorías</option>
-              <option value="planificacion">Planificación Académica</option>
-              <option value="curriculo">Rediseño Curricular</option>
-              <option value="reglamento">Reglamento</option>
-              <option value="resolucion">Resolución</option>
-              <option value="otro">Otro</option>
+              {categorias.map(c => <option key={c.id} value={c.slug}>{c.nombre}</option>)}
             </select>
 
             <select value={filterAcceso} onChange={e => setFilterAcceso(e.target.value)}
@@ -167,8 +214,15 @@ export function AdminDocumentos() {
               <option value="interno">Solo interno</option>
             </select>
 
+            <button onClick={() => { setCatModal(true); setCatError(null); setCatForm({ nombre: '', color: 'blue' }); setEditingCatId(null) }}
+              className="ml-auto inline-flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 012-2z" />
+              </svg>
+              Categorías
+            </button>
             <button onClick={openNew}
-              className="ml-auto inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm">
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
@@ -204,7 +258,8 @@ export function AdminDocumentos() {
                 </tr>
               ) : filtered.map(d => {
                 const ext   = getExt(d.archivo_nombre)
-                const tc    = tipoConfig[d.tipo]
+                const cat   = catMap[d.tipo]
+                const tc    = { label: cat?.nombre ?? d.tipo, cls: colorBadge[cat?.color ?? 'gray'] ?? colorBadge.gray }
                 const es    = extStyle[ext] ?? { bg: 'bg-gray-50', text: 'text-gray-400' }
                 const fecha = new Date(d.created_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
                 return (
@@ -243,7 +298,7 @@ export function AdminDocumentos() {
                     <td className="px-5 py-4 text-gray-400 text-xs tabular-nums">{fecha}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <a href={d.archivo_url} target="_blank" rel="noopener noreferrer" download={d.archivo_nombre}
+                        <a href={`http://127.0.0.1:8000/api/documentos/${d.id}/download`}
                           className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition" title="Descargar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -313,12 +368,8 @@ export function AdminDocumentos() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Categoría</label>
-                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value as Documento['tipo'] }))} className={`${inputCls} select-styled`}>
-                    <option value="planificacion">Planificación Académica</option>
-                    <option value="curriculo">Rediseño Curricular</option>
-                    <option value="reglamento">Reglamento</option>
-                    <option value="resolucion">Resolución</option>
-                    <option value="otro">Otro</option>
+                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} className={`${inputCls} select-styled`}>
+                    {categorias.map(c => <option key={c.id} value={c.slug}>{c.nombre}</option>)}
                   </select>
                 </div>
                 <div>
@@ -366,6 +417,80 @@ export function AdminDocumentos() {
                 className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold transition shadow-sm">
                 {saving ? 'Guardando...' : (editingId !== null ? 'Guardar cambios' : 'Subir documento')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal categorías */}
+      {catModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          onClick={e => e.target === e.currentTarget && setCatModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[85vh] flex flex-col">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">Categorías · Documentos</h2>
+                <p className="text-xs text-gray-400 mt-0.5">{categorias.length} categorías registradas</p>
+              </div>
+              <button onClick={() => setCatModal(false)} className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-1">
+              {categorias.map(c => (
+                <div key={c.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 group">
+                  {editingCatId === c.id ? (
+                    <>
+                      <div className="flex gap-1 shrink-0">
+                        {COLOR_OPTIONS.map(col => (
+                          <button key={col} onClick={() => setEditCatForm(f => ({ ...f, color: col }))}
+                            className={`w-4 h-4 rounded-full ${colorDot[col]} transition ring-offset-1 ${editCatForm.color === col ? 'ring-2 ring-gray-400' : ''}`} />
+                        ))}
+                      </div>
+                      <input autoFocus value={editCatForm.nombre} onChange={e => setEditCatForm(f => ({ ...f, nombre: e.target.value }))}
+                        onKeyDown={e => { if (e.key === 'Enter') saveEditCat(c.id); if (e.key === 'Escape') setEditingCatId(null) }}
+                        className="flex-1 text-sm border-b border-blue-400 outline-none bg-transparent text-gray-900 py-0.5" />
+                      <button onClick={() => saveEditCat(c.id)} className="text-blue-600 text-xs font-semibold hover:text-blue-800 shrink-0">Guardar</button>
+                      <button onClick={() => setEditingCatId(null)} className="text-gray-400 text-xs hover:text-gray-600 shrink-0">✕</button>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`w-3 h-3 rounded-full shrink-0 ${colorDot[c.color] ?? 'bg-gray-400'}`} />
+                      <span className="flex-1 text-sm text-gray-800">{c.nombre}</span>
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                        <button onClick={() => startEditCat(c)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition" title="Editar">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button onClick={() => deleteCat(c.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition" title="Eliminar">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="px-4 py-4 border-t border-gray-100 shrink-0">
+              {catError && <p className="text-xs text-red-500 mb-2">{catError}</p>}
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Nueva categoría</p>
+              <div className="flex gap-1.5 mb-3 flex-wrap">
+                {COLOR_OPTIONS.map(col => (
+                  <button key={col} onClick={() => setCatForm(f => ({ ...f, color: col }))}
+                    className={`w-5 h-5 rounded-full ${colorDot[col]} transition ring-offset-1 ${catForm.color === col ? 'ring-2 ring-gray-400 scale-110' : 'hover:scale-110'}`} />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input value={catForm.nombre} onChange={e => setCatForm(f => ({ ...f, nombre: e.target.value }))}
+                  onKeyDown={e => e.key === 'Enter' && addCat()}
+                  placeholder="Nombre de la categoría"
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder:text-gray-400" />
+                <button onClick={addCat} disabled={catSaving}
+                  className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold transition shadow-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>

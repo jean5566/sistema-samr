@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Docente;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class UserController extends Controller
                 'name'       => $u->name,
                 'email'      => $u->email,
                 'role'       => $u->role,
+                'estado'     => $u->estado,
                 'created_at' => $u->created_at,
             ]);
 
@@ -51,13 +53,25 @@ class UserController extends Controller
             'email'    => $data['email'],
             'role'     => $data['role'],
             'password' => Hash::make($data['password']),
+            'estado'   => 'activo',
         ]);
+
+        if ($user->role === 'docente') {
+            Docente::create([
+                'user_id' => $user->id,
+                'nombre'  => $user->name,
+                'email'   => $user->email,
+                'titulo'  => null,
+                'area'    => null,
+            ]);
+        }
 
         return response()->json([
             'id'         => $user->id,
             'name'       => $user->name,
             'email'      => $user->email,
             'role'       => $user->role,
+            'estado'     => $user->estado,
             'created_at' => $user->created_at,
         ], 201);
     }
@@ -81,15 +95,74 @@ class UserController extends Controller
             unset($data['password']);
         }
 
+        $oldRole = $user->role;
         $user->update($data);
+        $user->refresh();
+        $user->load('docente');
+
+        // Sincronizar con tabla docentes
+        if ($user->role === 'docente') {
+            if ($user->docente) {
+                $docenteFields = [];
+                if (isset($data['name']))  $docenteFields['nombre'] = $data['name'];
+                if (isset($data['email'])) $docenteFields['email']  = $data['email'];
+                if ($docenteFields) {
+                    $user->docente->update($docenteFields);
+                }
+            } else {
+                // Crear perfil si no existe
+                Docente::create([
+                    'user_id' => $user->id,
+                    'nombre'  => $user->name,
+                    'email'   => $user->email,
+                    'titulo'  => null,
+                    'area'    => null,
+                ]);
+            }
+        }
+
+        // Si el rol cambió desde docente, eliminar el perfil
+        if ($oldRole === 'docente' && $user->role !== 'docente' && $user->docente) {
+            $user->docente->delete();
+        }
 
         return response()->json([
             'id'         => $user->id,
             'name'       => $user->name,
             'email'      => $user->email,
             'role'       => $user->role,
+            'estado'     => $user->estado,
             'created_at' => $user->created_at,
         ]);
+    }
+
+    public function aprobar(Request $request, User $user): JsonResponse
+    {
+        if (!$this->adminOnly($request)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+        $user->update(['estado' => 'activo']);
+
+        if ($user->role === 'docente' && !$user->docente) {
+            Docente::create([
+                'user_id' => $user->id,
+                'nombre'  => $user->name,
+                'email'   => $user->email,
+                'titulo'  => null,
+                'area'    => null,
+            ]);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function rechazar(Request $request, User $user): JsonResponse
+    {
+        if (!$this->adminOnly($request)) {
+            return response()->json(['message' => 'No autorizado.'], 403);
+        }
+        $user->update(['estado' => 'rechazado']);
+        return response()->json(['ok' => true]);
     }
 
     public function destroy(Request $request, User $user): JsonResponse

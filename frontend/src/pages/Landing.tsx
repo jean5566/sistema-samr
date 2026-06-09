@@ -2,11 +2,39 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import api from '../lib/api'
 
+const STORAGE_URL = 'http://127.0.0.1:8000/storage'
+
+interface Documento {
+  id: number
+  nombre: string
+  tipo: 'planificacion' | 'curriculo' | 'reglamento' | 'resolucion' | 'otro'
+  descripcion: string | null
+  archivo: string
+  archivo_nombre: string
+  archivo_tamanio: number | null
+}
+
+const docTipo: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+  planificacion: { label: 'Planificación', color: 'text-blue-700',    bg: 'bg-blue-50',    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+  curriculo:     { label: 'Currículo',     color: 'text-emerald-700', bg: 'bg-emerald-50', icon: 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' },
+  reglamento:    { label: 'Reglamento',    color: 'text-purple-700',  bg: 'bg-purple-50',  icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
+  resolucion:    { label: 'Resolución',    color: 'text-amber-700',   bg: 'bg-amber-50',   icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  otro:          { label: 'Documento',     color: 'text-gray-600',    bg: 'bg-gray-50',    icon: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z' },
+}
+
+function fmtBytes(b: number | null) {
+  if (!b) return ''
+  if (b < 1024) return `${b} B`
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)} KB`
+  return `${(b / (1024 * 1024)).toFixed(1)} MB`
+}
+
 interface Noticia {
   id: number
   titulo: string
   categoria: string
   fecha: string
+  fecha_realizacion: string | null
   descripcion: string
   imagen: string | null
   destacada: boolean
@@ -35,14 +63,34 @@ function fechaCorta(raw: string) {
 
 export function Landing() {
   const navigate = useNavigate()
-  const [noticias, setNoticias] = useState<Noticia[]>([])
+  const [noticias, setNoticias]     = useState<Noticia[]>([])
+  const [documentos, setDocumentos] = useState<Documento[]>([])
+  const [rotIndex, setRotIndex]     = useState(0)
+  const [visible, setVisible]       = useState(true)
 
   useEffect(() => {
     api.get<Noticia[]>('/noticias').then(res => setNoticias(res.data))
+    api.get<Documento[]>('/documentos').then(res => setDocumentos(res.data))
   }, [])
 
-  const featured  = noticias.find(n => n.destacada) ?? noticias[0] ?? null
-  const secondary = noticias.filter(n => n.id !== featured?.id).slice(0, 2)
+  const featured = noticias.find(n => n.destacada) ?? noticias[0] ?? null
+  const pool     = noticias.filter(n => n.id !== featured?.id)
+
+  useEffect(() => {
+    if (pool.length <= 2) return
+    const t = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setRotIndex(i => i + 1)
+        setVisible(true)
+      }, 550)
+    }, 6000)
+    return () => clearInterval(t)
+  }, [pool.length])
+
+  const secondary = pool.length > 0
+    ? [pool[rotIndex % pool.length], pool[(rotIndex + 1) % pool.length]].filter(Boolean)
+    : []
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,7 +130,7 @@ export function Landing() {
               {/* Noticia principal */}
               {featured && (
                 <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-md group cursor-pointer"
-                  style={{ minHeight: '260px' }} onClick={() => navigate('/noticias')}>
+                  style={{ minHeight: '260px' }} onClick={() => navigate(`/noticias/${featured.id}`)}>
                   {featured.imagen
                     ? <>
                         <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
@@ -99,7 +147,14 @@ export function Landing() {
                       {catLabel[featured.categoria] ?? featured.categoria} · {fechaCorta(featured.fecha)}
                     </p>
                     <h3 className="text-white font-bold text-2xl leading-tight">{featured.titulo}</h3>
-                    <p className="text-white/80 text-sm mt-2 line-clamp-2">{featured.descripcion}</p>
+                    {featured.fecha_realizacion && (
+                      <div className="flex items-center gap-1.5 mt-3">
+                        <svg className="w-3.5 h-3.5 text-amber-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-amber-300 text-xs font-semibold">Se realiza el {fechaCorta(featured.fecha_realizacion)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -107,9 +162,11 @@ export function Landing() {
               {/* Noticias secundarias */}
               {secondary.length > 0 && (
                 <div className="flex flex-col gap-6">
-                  {secondary.map(n => (
-                    <div key={n.id} className="relative rounded-2xl overflow-hidden shadow-md group cursor-pointer flex-1"
-                      style={{ minHeight: '118px' }} onClick={() => navigate('/noticias')}>
+                  {secondary.map((n, i) => (
+                    <div key={n.id}
+                      className={`relative rounded-2xl overflow-hidden shadow-md group cursor-pointer flex-1 noticia-enter ${visible ? 'opacity-100' : 'opacity-0'}`}
+                      style={{ minHeight: '160px', transition: 'opacity 0.5s ease', animationDelay: `${i * 120}ms` }}
+                      onClick={() => navigate(`/noticias/${n.id}`)}>
                       {n.imagen
                         ? <>
                             <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
@@ -123,6 +180,14 @@ export function Landing() {
                           {catLabel[n.categoria] ?? n.categoria} · {fechaCorta(n.fecha)}
                         </p>
                         <h4 className="text-white font-bold text-sm leading-tight">{n.titulo}</h4>
+                        {n.fecha_realizacion && (
+                          <div className="flex items-center gap-1 mt-1.5">
+                            <svg className="w-3 h-3 text-amber-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-amber-300 text-[11px] font-semibold">Se realiza el {fechaCorta(n.fecha_realizacion)}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -133,6 +198,57 @@ export function Landing() {
           )}
         </div>
       </section>
+
+      {/* Documentos */}
+      {documentos.length > 0 && (
+        <section className="bg-white py-14">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-end justify-between mb-6 border-b-2 border-blue-100 pb-2">
+              <div>
+                <h2 className="text-2xl font-bold text-blue-900">Documentos y Recursos</h2>
+                <p className="text-sm text-gray-400 mt-0.5">Descarga los documentos oficiales de la carrera</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {documentos.map(doc => {
+                const t = docTipo[doc.tipo] ?? docTipo.otro
+                return (
+                  <div key={doc.id} className="flex items-start gap-4 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-200 rounded-2xl p-5 transition-colors group">
+                    <div className={`shrink-0 w-11 h-11 rounded-xl ${t.bg} flex items-center justify-center`}>
+                      <svg className={`w-5 h-5 ${t.color}`} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={t.icon} />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-[10px] font-bold uppercase tracking-wide ${t.color}`}>{t.label}</span>
+                      <h4 className="text-sm font-semibold text-gray-900 leading-snug mt-0.5 truncate">{doc.nombre}</h4>
+                      {doc.descripcion && (
+                        <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">{doc.descripcion}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-3">
+                        {doc.archivo_tamanio
+                          ? <span className="text-[11px] text-gray-400">{fmtBytes(doc.archivo_tamanio)}</span>
+                          : <span />
+                        }
+                        <a
+                          href={`http://127.0.0.1:8000/api/documentos/${doc.id}/download`}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Descargar
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Quick actions */}
       <section className="bg-white py-16">

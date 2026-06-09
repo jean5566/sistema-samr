@@ -11,7 +11,13 @@ class DocenteController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Docente::all());
+        $docentes = Docente::whereHas('user', fn($q) => $q->where('estado', 'activo'))
+            ->orWhereNull('user_id')
+            ->get();
+
+        return response()->json($docentes)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->header('Pragma', 'no-cache');
     }
 
     public function store(Request $request): JsonResponse
@@ -43,13 +49,14 @@ class DocenteController extends Controller
     public function update(Request $request, Docente $docente): JsonResponse
     {
         $data = $request->validate([
-            'nombre'   => 'sometimes|string|max:150',
-            'titulo'   => 'sometimes|string|max:150',
-            'area'     => 'sometimes|string|max:100',
-            'email'    => 'sometimes|email|unique:docentes,email,'.$docente->id,
-            'telefono' => 'nullable|string|max:30',
-            'bio'      => 'nullable|string',
-            'foto'     => 'nullable|image|max:5120',
+            'nombre'                      => 'sometimes|string|max:150',
+            'titulo'                      => 'sometimes|nullable|string|max:150',
+            'area'                        => 'sometimes|nullable|string|max:100',
+            'email'                       => 'sometimes|email|unique:docentes,email,'.$docente->id,
+            'telefono'                    => 'nullable|string|max:30',
+            'bio'                         => 'nullable|string',
+            'foto'                        => 'nullable|image|max:5120',
+            'permite_edicion_estudiantes' => 'sometimes|boolean',
         ]);
 
         if ($request->hasFile('foto')) {

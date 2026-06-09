@@ -6,6 +6,7 @@ use App\Models\Documento;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DocumentoController extends Controller
 {
@@ -16,6 +17,15 @@ class DocumentoController extends Controller
             ->get();
 
         return response()->json($docs);
+    }
+
+    public function download(Documento $documento): BinaryFileResponse
+    {
+        $path = Storage::disk('public')->path($documento->archivo);
+
+        abort_unless(file_exists($path), 404);
+
+        return response()->download($path, $documento->archivo_nombre);
     }
 
     public function indexPublicos(): JsonResponse
@@ -36,10 +46,15 @@ class DocumentoController extends Controller
 
         $data = $request->validate([
             'nombre'      => 'required|string|max:255',
-            'tipo'        => 'required|in:planificacion,curriculo,reglamento,resolucion,otro',
+            'tipo'        => 'required|string|max:100',
             'acceso'      => 'required|in:publico,interno',
             'descripcion' => 'nullable|string',
-            'archivo'     => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:20480',
+            'archivo'     => 'required|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:20480',
+        ], [
+            'archivo.mimetypes' => 'El archivo debe ser PDF, Word (.doc, .docx) o Excel (.xls, .xlsx).',
+            'archivo.max'       => 'El archivo no puede pesar más de 20 MB.',
+            'archivo.required'  => 'Debes seleccionar un archivo.',
+            'archivo.file'      => 'El archivo subido no es válido.',
         ]);
 
         $file   = $request->file('archivo');
@@ -67,10 +82,14 @@ class DocumentoController extends Controller
 
         $data = $request->validate([
             'nombre'      => 'sometimes|string|max:255',
-            'tipo'        => 'sometimes|in:planificacion,curriculo,reglamento,resolucion,otro',
+            'tipo'        => 'sometimes|string|max:100',
             'acceso'      => 'sometimes|in:publico,interno',
             'descripcion' => 'nullable|string',
-            'archivo'     => 'sometimes|file|mimes:pdf,doc,docx,xls,xlsx|max:20480',
+            'archivo'     => 'sometimes|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:20480',
+        ], [
+            'archivo.mimetypes' => 'El archivo debe ser PDF, Word (.doc, .docx) o Excel (.xls, .xlsx).',
+            'archivo.max'       => 'El archivo no puede pesar más de 20 MB.',
+            'archivo.file'      => 'El archivo subido no es válido.',
         ]);
 
         if ($request->hasFile('archivo')) {
