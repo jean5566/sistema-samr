@@ -8,6 +8,12 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    allowedHosts: true
+    allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://sistema-samr.test',
+        changeOrigin: true,
+      },
+    },
   },
 })

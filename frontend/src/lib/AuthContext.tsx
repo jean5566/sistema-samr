@@ -1,11 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import api from './api'
 
 interface Docente {
   id: number
   nombre: string
-  titulo: string
-  area: string
+  titulo: string | null
+  area: string | null
   email: string
   telefono: string | null
   bio: string | null

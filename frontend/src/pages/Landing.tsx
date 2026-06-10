@@ -232,7 +232,7 @@ export function Landing() {
                           : <span />
                         }
                         <a
-                          href={`http://127.0.0.1:8000/api/documentos/${doc.id}/download`}
+                          href={`/api/documentos/${doc.id}/download`}
                           className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

@@ -5,8 +5,8 @@ import api from '../../lib/api'
 interface DocenteData {
   id: number
   nombre: string
-  titulo: string
-  area: string
+  titulo: string | null
+  area: string | null
   email: string
   telefono: string | null
   bio: string | null
@@ -31,7 +31,7 @@ function Toast({ msg, visible, ok }: { msg: string; visible: boolean; ok: boolea
 
 const STORAGE_URL = 'http://127.0.0.1:8000/storage/'
 
-function comprimirImagen(file: File, maxPx = 800, quality = 0.82): Promise<Blob> {
+function comprimirImagen(file: File, maxPx = 250, quality = 0.82): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -81,8 +81,8 @@ export function DocentePerfil() {
         setNombre(d.nombre)
         setCorreo(d.email)
         setTelefono(d.telefono ?? '')
-        setTitulo(d.titulo)
-        setArea(d.area)
+        setTitulo(d.titulo ?? '')
+        setArea(d.area ?? '')
         setBio(d.bio ?? '')
         setFoto(d.foto_url ?? null)
       }

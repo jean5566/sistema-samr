@@ -298,7 +298,7 @@ export function AdminDocumentos() {
                     <td className="px-5 py-4 text-gray-400 text-xs tabular-nums">{fecha}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <a href={`http://127.0.0.1:8000/api/documentos/${d.id}/download`}
+                        <a href={`/api/documentos/${d.id}/download`}
                           className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition" title="Descargar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

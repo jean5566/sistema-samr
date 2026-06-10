@@ -162,7 +162,7 @@ export function EstudianteDocumentos() {
                     <td className="px-5 py-3.5 text-xs text-gray-400 hidden lg:table-cell">{formatBytes(d.archivo_tamanio)}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-400 hidden lg:table-cell">{formatFecha(d.created_at)}</td>
                     <td className="px-5 py-3.5 text-right">
-                      <a href={`http://127.0.0.1:8000/api/documentos/${d.id}/download`}
+                      <a href={`/api/documentos/${d.id}/download`}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
