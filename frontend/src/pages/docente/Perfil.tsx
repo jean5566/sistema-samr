@@ -35,7 +35,7 @@ const labelCls = 'block text-xs font-bold text-slate-600 mb-1.5 uppercase tracki
 
 const STORAGE_URL = 'http://127.0.0.1:8000/storage/'
 
-function comprimirImagen(file: File, maxPx = 250, quality = 0.82): Promise<Blob> {
+function comprimirImagen(file: File, maxPx = 1000, quality = 0.82): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
