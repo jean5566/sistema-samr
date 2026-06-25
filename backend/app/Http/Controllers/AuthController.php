@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -28,7 +30,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'name'                  => 'required|string|max:255',
             'email'                 => 'required|email|unique:users,email',
-            'password'              => 'required|string|min:6|confirmed',
+            'password'              => 'required|string|min:9|confirmed',
             'role'                  => 'required|in:docente,estudiante',
         ]);
 
@@ -50,9 +52,26 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Credenciales incorrectas.'], 401);
+        $key         = 'login:' . Str::lower($request->input('email', ''));
+        $maxIntentos = (int) (Configuracion::where('clave', 'intentos_login')->value('valor') ?? 5);
+
+        if (RateLimiter::tooManyAttempts($key, $maxIntentos)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json([
+                'message' => "Demasiados intentos fallidos. Intenta de nuevo en {$seconds} segundos.",
+            ], 429);
         }
+
+        if (!Auth::attempt($credentials)) {
+            RateLimiter::hit($key, 600);
+            $restantes = max(0, $maxIntentos - RateLimiter::attempts($key));
+            $msg = $restantes > 0
+                ? "Credenciales incorrectas. Intentos restantes: {$restantes}."
+                : 'Credenciales incorrectas.';
+            return response()->json(['message' => $msg], 401);
+        }
+
+        RateLimiter::clear($key);
 
         $user = Auth::user();
 
@@ -66,11 +85,21 @@ class AuthController extends Controller
             return response()->json(['message' => 'Tu cuenta ha sido rechazada. Contacta al administrador.', 'estado' => 'rechazado'], 403);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        $sesion_anterior = $user->tokens()->exists();
+        $user->tokens()->delete();
+
+        $minutos  = (int) (Configuracion::where('clave', 'sesion_minutos')->value('valor') ?? 60);
+        $newToken = $user->createToken('api-token');
+        $newToken->accessToken->forceFill([
+            'user_agent' => substr($request->userAgent() ?? '', 0, 500),
+            'ip_address' => $request->ip(),
+            'expires_at' => now()->addMinutes($minutos),
+        ])->save();
 
         return response()->json([
-            'token' => $token,
-            'user'  => [
+            'token'           => $newToken->plainTextToken,
+            'sesion_anterior' => $sesion_anterior,
+            'user'            => [
                 'id'      => $user->id,
                 'name'    => $user->name,
                 'email'   => $user->email,

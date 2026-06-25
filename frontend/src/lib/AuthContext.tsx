@@ -23,10 +23,14 @@ interface AuthUser {
   docente: Docente | null
 }
 
+export interface LoginResult extends AuthUser {
+  sesion_anterior: boolean
+}
+
 interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
-  login: (email: string, password: string) => Promise<AuthUser>
+  login: (email: string, password: string) => Promise<LoginResult>
   logout: () => Promise<void>
   setUser: (u: AuthUser) => void
 }
@@ -54,12 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [])
 
-  async function login(email: string, password: string): Promise<AuthUser> {
+  async function login(email: string, password: string): Promise<LoginResult> {
     const { data } = await api.post('/login', { email, password })
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setUser(data.user)
-    return data.user
+    return { ...data.user, sesion_anterior: data.sesion_anterior ?? false }
   }
 
   async function logout() {

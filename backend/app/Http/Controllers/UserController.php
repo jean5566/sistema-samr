@@ -175,6 +175,13 @@ class UserController extends Controller
             return response()->json(['message' => 'No puedes eliminar tu propia cuenta.'], 422);
         }
 
+        if ($user->docente) {
+            if ($user->docente->foto) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->docente->foto);
+            }
+            $user->docente->delete();
+        }
+
         $user->delete();
 
         return response()->json(null, 204);

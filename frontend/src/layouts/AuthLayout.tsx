@@ -8,25 +8,15 @@ export function AuthLayout() {
     <div className="h-screen w-full flex overflow-hidden">
 
       {/* ── Panel izquierdo fijo ── */}
-      <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center"
+      <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg,#0f1f45 0%,#1e3a6e 50%,#2a4d8f 100%)' }}>
 
-        {/* Orbs */}
-        <div className="auth-orb-1 absolute top-[-80px] left-[-60px] w-80 h-80 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(91,138,197,0.4) 0%,transparent 70%)', filter:'blur(40px)' }} />
-        <div className="auth-orb-2 absolute bottom-[-60px] right-[-40px] w-96 h-96 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(61,109,181,0.35) 0%,transparent 70%)', filter:'blur(50px)' }} />
-        <div className="auth-orb-3 absolute top-[35%] right-[5%] w-56 h-56 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(123,163,212,0.2) 0%,transparent 70%)', filter:'blur(30px)' }} />
-
-        {/* Grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-          style={{ backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize:'50px 50px' }} />
+        {/* Fondo Logo / Marca de agua (Girado en la esquina superior derecha hacia la izquierda) */}
+        <div className="absolute -top-40 -right-50 w-[800px] h-[800px] pointer-events-none opacity-[0.12] mix-blend-screen invert grayscale bg-no-repeat bg-contain bg-center transform -rotate-25"
+          style={{ backgroundImage: 'url("/logo.png")' }} />
 
         {/* Contenido */}
         <div className="relative z-10 flex flex-col items-center text-center px-12">
-          <img src="/logo.png" alt="CTI UNESUM"
-            className="auth-logo-pop h-24 w-24 object-contain rounded-full bg-white/10 p-2 shadow-2xl mb-8" />
           <h1 className="auth-fade-1 text-white text-3xl font-bold leading-tight">
             Tecnologías de<br />la Información
           </h1>

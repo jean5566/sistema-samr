@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\ArchivoPersonalController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CarpetaPersonalController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\NoticiaController;
+use App\Http\Controllers\SesionController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +44,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('configuracion/log', [ConfiguracionController::class, 'log']);
     Route::get('configuracion', [ConfiguracionController::class, 'index']);
     Route::post('configuracion', [ConfiguracionController::class, 'update']);
+
+    Route::get('sesiones', [SesionController::class, 'index']);
+    Route::delete('sesiones/otras', [SesionController::class, 'destroyOtras']);
+    Route::delete('sesiones/{id}', [SesionController::class, 'destroy']);
+    Route::put('estudiante/perfil', [EstudianteController::class, 'updatePerfil']);
     Route::put('estudiante/docentes/{docente}', [EstudianteController::class, 'updateDocentePerfil']);
+
+    Route::get('mis-archivos/{archivo}/download', [ArchivoPersonalController::class, 'download']);
+    Route::apiResource('mis-archivos', ArchivoPersonalController::class)
+        ->parameter('mis-archivos', 'archivo')
+        ->only(['index', 'store', 'update', 'destroy']);
+
+    Route::apiResource('mis-carpetas', CarpetaPersonalController::class)
+        ->parameter('mis-carpetas', 'carpeta')
+        ->only(['index', 'store', 'update', 'destroy']);
 });
 
 Route::get('noticias/{noticia}', [NoticiaController::class, 'show']);
