@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import api from '../../lib/api'
 
 interface Archivo {
@@ -201,9 +201,9 @@ export function EstudianteMisArchivos() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
-      <div className="px-8 py-6 shrink-0">
-        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Mis Archivos</h1>
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Mis Archivos</h1>
         <p className="text-sm font-medium text-slate-400 mt-1">Almacenamiento privado, solo tú puedes ver y descargar estos archivos.</p>
       </div>
 
@@ -317,10 +317,10 @@ export function EstudianteMisArchivos() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50/50 border-b border-slate-100/80">
                   <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Archivo</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Tamaño</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Acción</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Archivo</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Tamaño</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80">
@@ -342,16 +342,16 @@ export function EstudianteMisArchivos() {
                     const es  = extStyle[ext] ?? { bg: 'bg-slate-100', text: 'text-slate-600' }
                     return (
                       <tr key={a.id} className="hover:bg-slate-50/60 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm border border-white ${es.bg} ${es.text}`}>{ext}</span>
-                            <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{a.nombre}</p>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <span className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider shadow-sm border border-white shrink-0 ${es.bg} ${es.text}`}>{ext}</span>
+                            <p className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">{a.nombre}</p>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatBytes(a.archivo_tamanio)}</td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatFecha(a.created_at)}</td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="inline-flex items-center gap-2">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatBytes(a.archivo_tamanio)}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatFecha(a.created_at)}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                          <div className="inline-flex items-center gap-1 sm:gap-2">
                             <button onClick={() => setMoviendo(a)}
                               title="Mover a carpeta"
                               className="inline-flex items-center justify-center text-xs font-bold text-amber-600 bg-amber-50 hover:bg-amber-500 hover:text-white p-2 rounded-full transition-all shadow-sm border border-amber-100 hover:border-amber-500">
@@ -360,11 +360,11 @@ export function EstudianteMisArchivos() {
                               </svg>
                             </button>
                             <button onClick={() => descargar(a)} disabled={descargandoId === a.id}
-                              className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-full transition-all shadow-sm border border-blue-100 hover:border-blue-600 disabled:opacity-50">
+                              className="inline-flex items-center gap-1.5 sm:gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-3 sm:px-4 py-2 rounded-full transition-all shadow-sm border border-blue-100 hover:border-blue-600 disabled:opacity-50">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                               </svg>
-                              {descargandoId === a.id ? 'Descargando...' : 'Descargar'}
+                              <span className="hidden sm:inline">{descargandoId === a.id ? 'Descargando...' : 'Descargar'}</span>
                             </button>
                             <button onClick={() => eliminar(a.id)} disabled={borrandoId === a.id}
                               className="inline-flex items-center justify-center text-xs font-bold text-red-600 bg-red-50 hover:bg-red-600 hover:text-white p-2 rounded-full transition-all shadow-sm border border-red-100 hover:border-red-600 disabled:opacity-50">

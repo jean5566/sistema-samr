@@ -96,12 +96,12 @@ export function Landing() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-800/70 to-transparent z-10" />
         <div className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&q=80')" }} />
-        <div className="relative z-20 px-16">
+        <div className="relative z-20 px-4 sm:px-8 lg:px-16">
           <h1 className="text-white font-bold leading-tight drop-shadow-lg">
-            <span className="block text-4xl md:text-5xl">Bienvenidos a</span>
-            <span className="block text-4xl md:text-5xl">Tecnologías de la Información</span>
+            <span className="block text-2xl sm:text-4xl md:text-5xl">Bienvenidos a</span>
+            <span className="block text-2xl sm:text-4xl md:text-5xl">Tecnologías de la Información</span>
           </h1>
-          <p className="text-blue-200 text-lg mt-4 max-w-lg">Universidad Estatal del Sur de Manabí — UNESUM</p>
+          <p className="text-blue-200 text-sm sm:text-lg mt-3 sm:mt-4 max-w-lg">Universidad Estatal del Sur de Manabí — UNESUM</p>
           <button onClick={() => navigate('/login')}
             className="group relative mt-8 inline-flex items-center gap-4 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-full shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_40px_rgba(37,99,235,0.5)] hover:-translate-y-1 active:translate-y-0 transition-all duration-300 overflow-hidden text-sm sm:text-base uppercase tracking-wide cursor-pointer"
           >

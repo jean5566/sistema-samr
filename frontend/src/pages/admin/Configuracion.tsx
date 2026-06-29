@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import api from '../../lib/api'
 import { useAuth } from '../../lib/AuthContext'
 import { Toggle } from '../../components/ui/Toggle'
@@ -251,18 +251,42 @@ export function AdminConfiguracion() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
       {/* Topbar */}
-      <div className="px-8 py-6 shrink-0">
-        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Configuración</h1>
-        <p className="text-sm text-slate-500 mt-1">Administra las preferencias y ajustes del sistema.</p>
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Configuración</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">Administra las preferencias y ajustes del sistema.</p>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12 w-full max-w-[1400px] mx-auto">
+
+        {/* Tabs móvil — scroll horizontal */}
+        <div className="lg:hidden mb-4 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 pb-1">
+            {tabs.map(tab => {
+              const active = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all shrink-0 ${
+                    active
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={active ? 'text-white' : 'text-slate-400'}>{tab.icon}</span>
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         <div className="flex gap-6 items-start">
 
-          {/* Sidebar de tabs */}
-          <aside className="w-52 shrink-0 sticky top-6">
+          {/* Sidebar de tabs — solo desktop */}
+          <aside className="hidden lg:block w-52 shrink-0 sticky top-6">
             <nav className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-2 flex flex-col gap-0.5">
               {tabs.map(tab => {
                 const active = activeTab === tab.id
@@ -295,7 +319,7 @@ export function AdminConfiguracion() {
                   <p className="text-sm text-slate-500 mt-1">Datos de la cuenta con la que administras el sistema.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Nombre completo</label>
                     <input value={nombre} onChange={e => setNombre(e.target.value)} className={inputCls} />
@@ -308,7 +332,7 @@ export function AdminConfiguracion() {
 
                 <div className="border-t border-slate-100 pt-6">
                   <p className="text-sm font-bold text-slate-800 mb-4 ml-2">Cambiar contraseña</p>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelCls}>Nueva contraseña</label>
                       <input type="password" value={passNueva} onChange={e => setPassNueva(e.target.value)} placeholder="••••••••" className={inputCls} />
@@ -336,7 +360,7 @@ export function AdminConfiguracion() {
                   <div className="flex items-center justify-center py-12 text-slate-400 text-sm">Cargando configuración...</div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className={labelCls}>Nombre de la institución</label>
                         <input value={institucion} onChange={e => setInstitucion(e.target.value)} className={inputCls} />
@@ -411,7 +435,7 @@ export function AdminConfiguracion() {
                   <p className="text-sm text-slate-500 mt-1">Opciones de acceso y protección del sistema.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Tiempo de sesión</label>
                     <CustomSelect

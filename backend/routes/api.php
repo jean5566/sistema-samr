@@ -8,6 +8,7 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\EvaluacionSamrController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\SesionController;
 use App\Http\Controllers\StatsController;
@@ -50,6 +51,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('sesiones/{id}', [SesionController::class, 'destroy']);
     Route::put('estudiante/perfil', [EstudianteController::class, 'updatePerfil']);
     Route::put('estudiante/docentes/{docente}', [EstudianteController::class, 'updateDocentePerfil']);
+
+    Route::get('samr/preguntas', [EvaluacionSamrController::class, 'preguntas']);
+    Route::post('samr/evaluaciones', [EvaluacionSamrController::class, 'store']);
+    Route::post('samr/sugerencias', [EvaluacionSamrController::class, 'sugerir']);
 
     Route::get('mis-archivos/{archivo}/download', [ArchivoPersonalController::class, 'download']);
     Route::apiResource('mis-archivos', ArchivoPersonalController::class)

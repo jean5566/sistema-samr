@@ -25,6 +25,8 @@ import { EstudianteDocentes } from './pages/estudiante/Docentes'
 import { EstudianteDocumentos } from './pages/estudiante/Documentos'
 import { EstudianteMisArchivos } from './pages/estudiante/MisArchivos'
 import { EstudiantePerfil } from './pages/estudiante/Perfil'
+import { EstudianteGuiaSAMR } from './pages/estudiante/GuiaSAMR'
+import { EstudianteEvaluacionSAMR } from './pages/estudiante/EvaluacionSAMR'
 
 function ProtectedRoute({ role, children }: { role: string; children: JSX.Element }) {
   const { user, loading } = useAuth()
@@ -76,6 +78,8 @@ function AppRoutes() {
         <Route path="documentos" element={<EstudianteDocumentos />} />
         <Route path="mis-archivos" element={<EstudianteMisArchivos />} />
         <Route path="perfil" element={<EstudiantePerfil />} />
+        <Route path="guia-samr" element={<EstudianteGuiaSAMR />} />
+        <Route path="evaluacion-samr" element={<EstudianteEvaluacionSAMR />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

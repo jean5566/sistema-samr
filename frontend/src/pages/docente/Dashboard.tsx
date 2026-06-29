@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/AuthContext'
 import api from '../../lib/api'
@@ -70,20 +70,20 @@ function StatCard({ val, label, accent, iconBg, iconColor, icon, ready }: {
 }) {
   const value = useCounter(val, ready)
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100/60 p-6 shadow-sm flex flex-col group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+    <div className="bg-white rounded-[2rem] border border-slate-100/60 p-4 sm:p-6 shadow-sm flex flex-col group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
       <div className={`absolute top-0 left-0 w-full h-1.5 ${accent} opacity-80 group-hover:opacity-100 transition-opacity`} />
-      <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-          <svg className={`w-5 h-5 ${iconColor}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+          <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
           </svg>
         </div>
       </div>
       {ready
-        ? <p className="text-xl font-bold text-slate-900 tabular-nums tracking-tight mb-1">{value.toLocaleString()}</p>
-        : <div className="h-7 w-14 bg-slate-100 rounded-xl animate-pulse mb-1" />
+        ? <p className="text-base sm:text-xl font-bold text-slate-900 tabular-nums tracking-tight mb-1">{value.toLocaleString()}</p>
+        : <div className="h-6 sm:h-7 w-12 sm:w-14 bg-slate-100 rounded-xl animate-pulse mb-1" />
       }
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">{label}</p>
+      <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">{label}</p>
     </div>
   )
 }
@@ -120,58 +120,58 @@ export function DocenteDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
 
       {/* Topbar */}
-      <div className="px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Panel principal</h1>
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight">Panel principal</h1>
         </div>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12 w-full max-w-6xl mx-auto">
 
         {/* Bienvenida */}
-        <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-[2rem] px-8 py-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-lg shadow-blue-500/20 mb-6">
+        <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-[2rem] px-5 py-5 sm:px-8 sm:py-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 shadow-lg shadow-blue-500/20 mb-4 sm:mb-6">
           <div>
-            <p className="text-blue-200 text-sm font-bold uppercase tracking-wide mb-1">Bienvenido de vuelta</p>
-            <h2 className="text-3xl font-black tracking-tight">{docente?.nombre ?? user?.name}</h2>
-            <p className="text-blue-100 text-sm mt-2 font-medium">{subtitulo}</p>
+            <p className="text-blue-200 text-xs sm:text-sm font-bold uppercase tracking-wide mb-1">Bienvenido de vuelta</p>
+            <h2 className="text-xl sm:text-3xl font-black tracking-tight">{docente?.nombre ?? user?.name}</h2>
+            <p className="text-blue-100 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">{subtitulo}</p>
           </div>
           <button onClick={() => navigate('/dashboard/docente/perfil')}
-            className="bg-white text-blue-700 hover:bg-slate-50 text-sm font-bold px-6 py-3 rounded-full transition-all shadow-sm hover:shadow-md self-start sm:self-center whitespace-nowrap">
+            className="bg-white text-blue-700 hover:bg-slate-50 text-xs sm:text-sm font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-all shadow-sm hover:shadow-md self-start sm:self-center whitespace-nowrap">
             Ver perfil
           </button>
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 mb-4 sm:mb-6">
           {cardDefs.map(c => (
             <StatCard key={c.label} {...c} ready={ready} />
           ))}
         </div>
 
         {/* Noticias + Documentos */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-5">
 
           {/* Noticias recientes */}
           <div className="lg:col-span-3 bg-white rounded-[2rem] border border-slate-100/60 overflow-hidden shadow-sm flex flex-col">
-            <div className="px-8 py-6 border-b border-slate-100/80 bg-slate-50/30">
-              <h2 className="text-base font-bold text-slate-900">Noticias recientes</h2>
+            <div className="px-5 py-4 sm:px-8 sm:py-6 border-b border-slate-100/80 bg-slate-50/30">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">Noticias recientes</h2>
             </div>
             <div className="divide-y divide-slate-100/80 flex-1">
               {ready && noticias.length === 0 && (
-                <p className="px-8 py-8 text-sm font-medium text-slate-400">No hay noticias recientes.</p>
+                <p className="px-5 py-5 sm:px-8 sm:py-8 text-sm font-medium text-slate-400">No hay noticias recientes.</p>
               )}
               {noticias.slice(0, 5).map(n => (
-                <div key={n.id} className="flex items-center gap-5 px-8 py-4 hover:bg-slate-50/60 transition-colors">
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${CAT_COLORS[n.categoria] ?? 'bg-slate-100 text-slate-600'}`}>
+                <div key={n.id} className="flex items-center gap-3 sm:gap-5 px-4 sm:px-8 py-3 sm:py-4 hover:bg-slate-50/60 transition-colors">
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full shrink-0 ${CAT_COLORS[n.categoria] ?? 'bg-slate-100 text-slate-600'}`}>
                     {n.categoria}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 truncate">{n.titulo}</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-800 truncate">{n.titulo}</p>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-400 shrink-0 uppercase tracking-wide">{fechaFormato(n.fecha)}</span>
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 shrink-0 uppercase tracking-wide hidden sm:block">{fechaFormato(n.fecha)}</span>
                 </div>
               ))}
             </div>
@@ -179,24 +179,24 @@ export function DocenteDashboard() {
 
           {/* Documentos recientes */}
           <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100/60 overflow-hidden shadow-sm flex flex-col">
-            <div className="px-8 py-6 border-b border-slate-100/80 bg-slate-50/30">
-              <h2 className="text-base font-bold text-slate-900">Documentos recientes</h2>
+            <div className="px-5 py-4 sm:px-8 sm:py-6 border-b border-slate-100/80 bg-slate-50/30">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">Documentos recientes</h2>
             </div>
             <div className="divide-y divide-slate-100/80 flex-1">
               {ready && documentos.length === 0 && (
-                <p className="px-8 py-8 text-sm font-medium text-slate-400">No hay documentos disponibles.</p>
+                <p className="px-5 py-5 sm:px-8 sm:py-8 text-sm font-medium text-slate-400">No hay documentos disponibles.</p>
               )}
               {documentos.slice(0, 5).map(d => {
                 const ext = getExt(d.archivo_nombre)
                 const style = extStyle[ext] ?? { bg: 'bg-slate-100', text: 'text-slate-500' }
                 return (
                   <a key={d.id} href={`/api/documentos/${d.id}/download`}
-                    className="flex items-center gap-4 px-8 py-4 hover:bg-slate-50/60 transition-colors group">
-                    <div className={`w-10 h-10 rounded-2xl ${style.bg} ${style.text} flex items-center justify-center text-[10px] font-black uppercase shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                    className="flex items-center gap-3 sm:gap-4 px-4 sm:px-8 py-3 sm:py-4 hover:bg-slate-50/60 transition-colors group">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl ${style.bg} ${style.text} flex items-center justify-center text-[10px] font-black uppercase shrink-0 group-hover:scale-110 transition-transform duration-300`}>
                       {ext}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">{d.nombre}</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">{d.nombre}</p>
                       <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider">{formatBytes(d.archivo_tamanio)}</p>
                     </div>
                   </a>

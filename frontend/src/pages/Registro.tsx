@@ -48,10 +48,16 @@ export function Registro() {
       .catch(() => setHabilitado(false))
   }, [])
 
+  function contarPalabras(texto: string) {
+    return texto.trim().split(/\s+/).filter(p => p.length > 0).length
+  }
+
   async function handleRegister() {
-    if (!role)             { setError('Selecciona tu tipo de usuario.'); return }
-    if (!apellidos)        { setError('Ingresa tus apellidos.'); return }
-    if (!nombres)          { setError('Ingresa tus nombres.'); return }
+    if (!role)                        { setError('Selecciona tu tipo de usuario.'); return }
+    if (!apellidos)                   { setError('Ingresa tus apellidos.'); return }
+    if (contarPalabras(apellidos) < 2){ setError('Ingresa tus 2 apellidos completos.'); return }
+    if (!nombres)                     { setError('Ingresa tus nombres.'); return }
+    if (contarPalabras(nombres) < 2)  { setError('Ingresa tus 2 nombres completos.'); return }
     if (!correo)           { setError('Ingresa tu correo institucional.'); return }
     if (!pass)             { setError('Ingresa una contraseña.'); return }
     if (pass.length <= 8)  { setError('La contraseña debe tener más de 8 caracteres.'); return }
@@ -77,14 +83,6 @@ export function Registro() {
 
   return (
     <div className="w-full max-w-md">
-
-      {/* Header mobile */}
-      <div className="lg:hidden flex flex-col items-center mb-8">
-        <img src="/logo.png" alt="CTI UNESUM"
-          className="h-14 w-14 object-contain rounded-full bg-blue-50 p-1 shadow mb-3" />
-        <h1 className="text-blue-900 text-lg font-bold">Tecnologías de la Información</h1>
-        <p className="text-gray-400 text-xs mt-0.5">Universidad Estatal del Sur de Manabí</p>
-      </div>
 
       {/* Cargando */}
       {habilitado === null && (
@@ -148,12 +146,9 @@ export function Registro() {
       {/* Formulario */}
       {habilitado === true && !pendiente && (
         <>
-          <div className="auth-fade-1 mb-8 text-center lg:text-left">
-          </div>
-
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/50">
+          <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/50">
             {/* Rol */}
-            <div className="auth-fade-3 mb-6">
+            <div className="auth-fade-3 mb-5 sm:mb-6">
               <label className="block text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1">Soy...</label>
               <div className="grid grid-cols-2 gap-3">
                 {roleOptions.map(r => (
@@ -178,7 +173,7 @@ export function Registro() {
             </div>
 
             {/* Apellidos y nombres */}
-            <div className="auth-fade-4 grid grid-cols-2 gap-3 mb-5">
+            <div className="auth-fade-4 grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 sm:mb-5">
               <div>
                 <label className="block text-[10px] sm:text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1 truncate">Apellidos</label>
                 <div className="relative group">
@@ -189,7 +184,7 @@ export function Registro() {
                   </div>
                   <input value={apellidos} onChange={e => setApellidos(soloLetras(e.target.value))}
                     onBlur={() => setApellidos(capitalizarNombre(apellidos))}
-                    placeholder="Tus apellidos"
+                    placeholder="Primer Apellido Segundo"
                     className="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
                 </div>
               </div>
@@ -203,14 +198,14 @@ export function Registro() {
                   </div>
                   <input value={nombres} onChange={e => setNombres(soloLetras(e.target.value))}
                     onBlur={() => setNombres(capitalizarNombre(nombres))}
-                    placeholder="Tus nombres"
+                    placeholder="Primer Nombre Segundo"
                     className="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
                 </div>
               </div>
             </div>
 
             {/* Correo */}
-            <div className="auth-fade-4 mb-5">
+            <div className="auth-fade-4 mb-4 sm:mb-5">
               <label className="block text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1">Correo institucional</label>
               <div className="relative group flex items-stretch">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -220,15 +215,15 @@ export function Registro() {
                 </div>
                 <input type="text" value={correo} onChange={e => setCorreo(soloCorreo(e.target.value))}
                   placeholder="usuario"
-                  className="w-full min-w-0 pl-11 pr-2 py-3 rounded-l-2xl border border-r-0 border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
-                <span className="inline-flex items-center pl-2 pr-4 rounded-r-2xl border border-slate-200 bg-slate-100 text-slate-400 text-sm font-semibold select-none whitespace-nowrap">
+                  className="w-full min-w-0 pl-11 pr-1 py-3 rounded-l-2xl border border-r-0 border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
+                <span className="inline-flex items-center px-2 sm:px-3 rounded-r-2xl border border-slate-200 bg-slate-100 text-slate-400 text-[11px] sm:text-sm font-semibold select-none whitespace-nowrap">
                   {DOMINIO_CORREO}
                 </span>
               </div>
             </div>
 
             {/* Contraseñas */}
-            <div className="auth-fade-5 grid grid-cols-2 gap-3 mb-5">
+            <div className="auth-fade-5 grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 sm:mb-5">
               <div>
                 <label className="block text-[10px] sm:text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1 truncate">Contraseña</label>
                 <div className="relative group">
@@ -256,9 +251,9 @@ export function Registro() {
                 </div>
               </div>
             </div>
-            <p className="auth-fade-5 text-[11px] text-slate-400 -mt-3 mb-5 ml-1">La contraseña debe tener más de 8 caracteres.</p>
+            <p className="auth-fade-5 text-[11px] text-slate-400 -mt-2 mb-4 sm:mb-5 ml-1">La contraseña debe tener más de 8 caracteres.</p>
 
-            <label className="auth-fade-6 flex items-center gap-2.5 mb-6 cursor-pointer select-none w-fit ml-1">
+            <label className="auth-fade-6 flex items-center gap-2.5 mb-4 sm:mb-6 cursor-pointer select-none w-fit ml-1">
               <input type="checkbox" checked={showPass} onChange={e => setShowPass(e.target.checked)}
                 className="accent-blue-600 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 transition-all" />
               <span className="text-xs font-semibold text-slate-400">Mostrar contraseñas</span>

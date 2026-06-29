@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import api from '../../lib/api'
 
 interface Stats {
@@ -37,20 +37,20 @@ interface StatCardProps {
 function StatCard({ val, label, accent, iconBg, iconColor, icon, ready }: StatCardProps) {
   const value = useCounter(val, ready)
   return (
-    <div className={`bg-white rounded-[2rem] border border-slate-100/60 p-6 shadow-sm flex flex-col group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden`}>
+    <div className={`bg-white rounded-[2rem] border border-slate-100/60 p-4 sm:p-6 shadow-sm flex flex-col group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden`}>
       <div className={`absolute top-0 left-0 w-full h-1.5 ${accent} opacity-80 group-hover:opacity-100 transition-opacity`} />
-      <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-          <svg className={`w-5 h-5 ${iconColor}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+          <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
           </svg>
         </div>
       </div>
       {ready
-        ? <p className="text-xl font-bold text-slate-900 tabular-nums tracking-tight mb-1">{value.toLocaleString()}</p>
-        : <div className="h-7 w-14 bg-slate-100 rounded-xl animate-pulse mb-1" />
+        ? <p className="text-base sm:text-xl font-bold text-slate-900 tabular-nums tracking-tight mb-1">{value.toLocaleString()}</p>
+        : <div className="h-6 sm:h-7 w-12 sm:w-14 bg-slate-100 rounded-xl animate-pulse mb-1" />
       }
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">{label}</p>
+      <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">{label}</p>
     </div>
   )
 }
@@ -100,17 +100,17 @@ export function AdminDashboard() {
   const ready = stats !== null
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
       {/* Topbar */}
-      <div className="px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Panel de Control</h1>
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight">Panel de Control</h1>
         </div>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12 w-full max-w-[1400px] mx-auto">
           {/* Stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-4 sm:mb-6">
             {cardDefs.map(c => (
               <StatCard
                 key={c.key}
@@ -126,8 +126,8 @@ export function AdminDashboard() {
           </div>
 
           {/* Recursos del sistema */}
-          <div className="bg-white rounded-[2rem] border border-slate-100/60 shadow-sm p-6 group hover:shadow-lg transition-all duration-300">
-            <h2 className="text-base font-bold text-slate-900 mb-5">Recursos del sistema</h2>
+          <div className="bg-white rounded-[2rem] border border-slate-100/60 shadow-sm p-4 sm:p-6 group hover:shadow-lg transition-all duration-300">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 mb-4 sm:mb-5">Recursos del sistema</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[
                 {

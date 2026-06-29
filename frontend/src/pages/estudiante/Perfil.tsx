@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useAuth } from '../../lib/AuthContext'
 import api from '../../lib/api'
 
@@ -66,21 +66,21 @@ export function EstudiantePerfil() {
     .join('')
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
-      <div className="px-8 py-6 shrink-0">
-        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Mi Perfil</h1>
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Mi Perfil</h1>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12">
         <div className="max-w-2xl mx-auto flex flex-col gap-5">
 
           {/* Avatar */}
-          <div className="bg-white rounded-[2rem] border border-slate-100/60 p-8 flex flex-col sm:flex-row items-center sm:items-start gap-8 shadow-sm">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white text-3xl font-black shrink-0 shadow-lg shadow-blue-500/30">
+          <div className="bg-white rounded-[2rem] border border-slate-100/60 p-5 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8 shadow-sm">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shrink-0 shadow-lg shadow-blue-500/30">
               {iniciales || '?'}
             </div>
             <div className="text-center sm:text-left flex-1 mt-2">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">{user?.name}</h2>
+              <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">{user?.name}</h2>
               <p className="text-sm font-medium text-slate-500 mt-1">{user?.email}</p>
               <div className="inline-flex mt-4 items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-wide">
                 Estudiante

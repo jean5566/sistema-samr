@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import api from '../../lib/api'
 import { colorBadge, colorDot } from '../../lib/catColors'
 
@@ -70,9 +70,9 @@ export function EstudianteDocumentos() {
     ), [docs, search, catFil])
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
-      <div className="px-8 py-6 shrink-0">
-        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Documentos</h1>
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Documentos</h1>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12">
@@ -112,11 +112,11 @@ export function EstudianteDocumentos() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50/50 border-b border-slate-100/80">
                   <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Documento</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Categoría</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Tamaño</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Acción</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Documento</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Categoría</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Tamaño</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80">
@@ -139,18 +139,18 @@ export function EstudianteDocumentos() {
                     const cat = catMap[d.tipo]
                     return (
                       <tr key={d.id} className="hover:bg-slate-50/60 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm border border-white ${es.bg} ${es.text}`}>{ext}</span>
-                            <div>
-                              <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{d.nombre}</p>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <span className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider shadow-sm border border-white shrink-0 ${es.bg} ${es.text}`}>{ext}</span>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">{d.nombre}</p>
                               {d.descripcion && (
-                                <p className="text-xs font-medium text-slate-500 mt-0.5 truncate max-w-xs">{d.descripcion}</p>
+                                <p className="text-xs font-medium text-slate-500 mt-0.5 truncate max-w-[140px] sm:max-w-xs hidden sm:block">{d.descripcion}</p>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 hidden md:table-cell">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                           {cat ? (
                             <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border shadow-sm ${colorBadge[cat.color] ?? colorBadge.gray}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${colorDot[cat.color] ?? 'bg-slate-400'}`} />
@@ -160,15 +160,15 @@ export function EstudianteDocumentos() {
                             <span className="text-xs font-medium text-slate-400">{d.tipo}</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatBytes(d.archivo_tamanio)}</td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatFecha(d.created_at)}</td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatBytes(d.archivo_tamanio)}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm font-medium text-slate-500 hidden lg:table-cell">{formatFecha(d.created_at)}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <a href={`/api/documentos/${d.id}/download`}
-                            className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-full transition-all shadow-sm border border-blue-100 hover:border-blue-600">
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-3 sm:px-4 py-2 rounded-full transition-all shadow-sm border border-blue-100 hover:border-blue-600">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            Descargar
+                            <span className="hidden sm:inline">Descargar</span>
                           </a>
                         </td>
                       </tr>

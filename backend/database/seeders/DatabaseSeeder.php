@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UsuariosSeeder::class,
             CategoriasSeeder::class,
             NoticiasSeeder::class,
+            PreguntasSamrSeeder::class,
         ]);
     }
 }

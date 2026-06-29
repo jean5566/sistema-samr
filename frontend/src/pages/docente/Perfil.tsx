@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../lib/AuthContext'
 import api from '../../lib/api'
 
@@ -143,9 +143,9 @@ export function DocentePerfil() {
     .join('')
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
-      <div className="px-8 py-6 shrink-0">
-        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Mi Perfil</h1>
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Mi Perfil</h1>
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12">
@@ -166,9 +166,9 @@ export function DocentePerfil() {
         <div className="max-w-4xl mx-auto flex flex-col gap-5" style={{ display: fetching || !docente ? 'none' : undefined }}>
 
           {/* Avatar + nombre */}
-          <div className="bg-white rounded-[2rem] border border-slate-100/60 p-8 flex flex-col sm:flex-row items-center sm:items-start gap-8 shadow-sm">
+          <div className="bg-white rounded-[2rem] border border-slate-100/60 p-5 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8 shadow-sm">
             <div className="relative shrink-0 group">
-              <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white text-4xl font-black overflow-hidden shadow-lg shadow-blue-500/30">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white text-3xl sm:text-4xl font-black overflow-hidden shadow-lg shadow-blue-500/30">
                 {foto
                   ? <img src={foto} alt="Foto de perfil" className="w-full h-full object-cover" />
                   : iniciales}
@@ -193,8 +193,8 @@ export function DocentePerfil() {
               />
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">{nombre}</h2>
-              <p className="text-lg font-medium text-slate-500 mt-1">{titulo}</p>
+              <h2 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{nombre}</h2>
+              <p className="text-sm sm:text-lg font-medium text-slate-500 mt-1">{titulo}</p>
               <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-wide">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 {area}

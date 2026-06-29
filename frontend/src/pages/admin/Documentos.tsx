@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+﻿import { useState, useMemo, useEffect, useRef } from 'react'
 import api from '../../lib/api'
 import { CustomSelect } from '../../components/ui/CustomSelect'
 import { COLOR_OPTIONS, colorBadge, colorDot } from '../../lib/catColors'
@@ -178,11 +178,11 @@ export function AdminDocumentos() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
       {/* Topbar */}
-      <div className="px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Documentos Institucionales</h1>
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight">Documentos Institucionales</h1>
         </div>
       </div>
 
@@ -239,15 +239,16 @@ export function AdminDocumentos() {
           </div>
 
           {/* Table */}
-          <div className="w-full">
+          <div className="w-full overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ borderSpacing: 0 }}>
             <thead>
               <tr className="bg-slate-200/60">
-                {['Documento', 'Categoría', 'Acceso', 'Subido por', 'Fecha', ''].map((h, i, arr) => (
-                  <th key={h} className={`px-6 py-4 text-left text-xs font-bold text-slate-700 ${i === 0 ? 'rounded-l-[20px]' : ''} ${i === arr.length - 1 ? 'rounded-r-[20px]' : ''}`}>
-                    {h}
-                  </th>
-                ))}
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 rounded-l-[20px]">Documento</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden sm:table-cell">Categoría</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden md:table-cell">Acceso</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden md:table-cell">Subido por</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden lg:table-cell">Fecha</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 rounded-r-[20px]"></th>
               </tr>
             </thead>
             <tbody>
@@ -275,21 +276,21 @@ export function AdminDocumentos() {
                 const fecha = new Date(d.created_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
                 return (
                   <tr key={d.id} className="group border-b border-slate-200/80 hover:bg-white transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-2xl ${es.bg} flex items-center justify-center shrink-0 shadow-sm border border-white`}>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl ${es.bg} flex items-center justify-center shrink-0 shadow-sm border border-white`}>
                           <span className={`text-[10px] font-black uppercase ${es.text} tracking-wider`}>{ext}</span>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{d.nombre}</p>
-                          <p className="text-slate-500 text-xs font-medium mt-0.5">{d.archivo_nombre} · {formatBytes(d.archivo_tamanio)}</p>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors text-xs sm:text-sm truncate">{d.nombre}</p>
+                          <p className="text-slate-500 text-xs font-medium mt-0.5 hidden sm:block">{d.archivo_nombre} · {formatBytes(d.archivo_tamanio)}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                       <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold tracking-wide ${tc.cls}`}>{tc.label}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                       {d.acceso === 'publico'
                         ? <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 rounded-full px-3 py-1.5 text-[11px] font-bold tracking-wide">
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -305,24 +306,24 @@ export function AdminDocumentos() {
                           </span>
                       }
                     </td>
-                    <td className="px-6 py-4 text-slate-600 text-sm font-medium">{d.autor?.name ?? '—'}</td>
-                    <td className="px-6 py-4 text-slate-500 text-sm font-medium tabular-nums">{fecha}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-slate-600 text-xs sm:text-sm font-medium hidden md:table-cell">{d.autor?.name ?? '—'}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-slate-500 text-xs sm:text-sm font-medium tabular-nums hidden lg:table-cell">{fecha}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <a href={`/api/documentos/${d.id}/download`}
-                          className="p-2.5 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Descargar">
+                          className="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Descargar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
                         </a>
                         <button onClick={() => openEdit(d)}
-                          className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Editar">
+                          className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Editar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
                         <button onClick={() => remove(d.id)}
-                          className="p-2.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Eliminar">
+                          className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Eliminar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import api from '../../lib/api'
 import { CustomSelect } from '../../components/ui/CustomSelect'
 import { Toggle } from '../../components/ui/Toggle'
@@ -156,11 +156,11 @@ export function AdminUsuarios() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
       {/* Topbar */}
-      <div className="px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight flex items-center gap-3">
             Gestión de Usuarios
             {pendienteCount > 0 && (
               <span className="inline-flex items-center bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1 rounded-full border border-amber-200">
@@ -208,8 +208,8 @@ export function AdminUsuarios() {
         )}
 
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-4 mb-8">
-          <div className="relative w-64">
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <div className="relative w-full sm:w-64">
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Buscar..."
               className={inputCls} />
@@ -248,15 +248,16 @@ export function AdminUsuarios() {
         </div>
 
         {/* Table */}
-        <div className="w-full">
+        <div className="w-full overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ borderSpacing: 0 }}>
             <thead>
               <tr className="bg-slate-200/60">
-                {['Usuario', 'Correo', 'Rol', 'Ingreso', 'Estado', 'Acciones'].map((h, i, arr) => (
-                  <th key={h} className={`px-6 py-4 text-left text-xs font-bold text-slate-700 ${i === 0 ? 'rounded-l-[20px]' : ''} ${i === arr.length - 1 ? 'rounded-r-[20px]' : ''}`}>
-                    {h}
-                  </th>
-                ))}
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 rounded-l-[20px]">Usuario</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden md:table-cell">Correo</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden sm:table-cell">Rol</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 hidden lg:table-cell">Ingreso</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700">Estado</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-700 rounded-r-[20px]">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -272,32 +273,32 @@ export function AdminUsuarios() {
                 </tr>
               ) : paginated.map(u => (
                 <tr key={u.id} className="group border-b border-slate-200/80 hover:bg-white transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${avatarColors[u.role] ?? 'bg-slate-100 text-slate-700'}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${avatarColors[u.role] ?? 'bg-slate-100 text-slate-700'}`}>
                         {initials(u.name)}
                       </div>
-                      <span className="font-semibold text-slate-900">{u.name}</span>
+                      <span className="font-semibold text-slate-900 text-xs sm:text-sm">{u.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-600">{u.email}</td>
-                  <td className="px-6 py-4"><RolBadge rol={u.role} /></td>
-                  <td className="px-6 py-4 text-slate-600 text-xs font-semibold">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-slate-600 text-xs sm:text-sm hidden md:table-cell">{u.email}</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell"><RolBadge rol={u.role} /></td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-slate-600 text-xs font-semibold hidden lg:table-cell">
                     {new Date(u.created_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </td>
-                  <td className="px-6 py-4"><EstadoBadge estado={u.estado} /></td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4"><EstadoBadge estado={u.estado} /></td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       {u.estado === 'pendiente' && (
                         <>
                           <button onClick={() => aprobar(u.id)}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Aprobar">
+                            className="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Aprobar">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                           </button>
                           <button onClick={() => rechazar(u.id)}
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Rechazar">
+                            className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Rechazar">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -306,14 +307,14 @@ export function AdminUsuarios() {
                       )}
                       {u.estado !== 'pendiente' && (
                         <button onClick={() => openEdit(u)}
-                          className="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Editar">
+                          className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Editar">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
                       )}
                       <button onClick={() => setConfirmDelete(u)}
-                        className="p-2.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Eliminar">
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Eliminar">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>

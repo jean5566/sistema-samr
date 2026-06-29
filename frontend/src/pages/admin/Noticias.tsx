@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import api from '../../lib/api'
 import { CustomSelect } from '../../components/ui/CustomSelect'
 import { COLOR_OPTIONS, colorBadge, colorBg, colorDot } from '../../lib/catColors'
@@ -167,11 +167,11 @@ export function AdminNoticias() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
       {/* Topbar */}
-      <div className="px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Noticias y Eventos</h1>
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight">Noticias y Eventos</h1>
         </div>
         {noticias.some(n => n.destacada) && (
           <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide shadow-sm">

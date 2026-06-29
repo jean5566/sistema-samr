@@ -55,18 +55,23 @@ export function AuthLayout() {
       {/* ── Panel derecho — cambia por ruta ── */}
       <div
         key={location.pathname}
-        className="auth-card-enter w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-10 overflow-y-auto relative">
+        className="auth-card-enter w-full lg:w-1/2 flex flex-col bg-slate-50 overflow-y-auto relative">
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-50 z-0" />
 
-        {/* Volver — solo mobile */}
-        <button onClick={() => navigate('/')}
-          className="lg:hidden absolute top-5 left-5 flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition text-xs font-medium">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver
-        </button>
+        {/* Topbar Volver — solo mobile */}
+        <div className="lg:hidden relative z-10 px-4 pt-4 pb-2 shrink-0">
+          <button onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition text-xs font-semibold shadow-sm">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver al inicio
+          </button>
+        </div>
 
-        <Outlet />
+        <div className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10">
+          <Outlet />
+        </div>
       </div>
     </div>
   )

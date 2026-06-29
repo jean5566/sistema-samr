@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import api from '../../lib/api'
 
@@ -125,10 +125,10 @@ export function EstudianteDocentes() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-y-auto flex flex-col">
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
 
       {/* Topbar */}
-      <div className="px-8 py-6 flex items-center gap-4 shrink-0">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 flex items-center gap-4 shrink-0">
         {selected && (
           <button onClick={handleBack}
             className="p-2 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors bg-white border border-slate-200 shadow-sm">
@@ -138,7 +138,7 @@ export function EstudianteDocentes() {
           </button>
         )}
         <div>
-          <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-[28px] font-bold text-slate-900 tracking-tight">
             {selected ? selected.docente.nombre : 'Mis Docentes'}
           </h1>
         </div>

@@ -57,71 +57,105 @@ export function NoticiasPage() {
   const filtered = cat ? noticias.filter(n => n.categoria === cat) : noticias
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-blue-900 text-white py-12 px-6 text-center">
-        <h1 className="text-3xl font-bold">Noticias</h1>
-        <p className="text-blue-200 mt-1 text-sm">Mantente al día con todo lo que ocurre en la carrera</p>
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 selection:bg-slate-200 relative overflow-hidden">
+      {/* Patrón de puntos decorativo en el fondo */}
+      <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none z-0 opacity-50"></div>
+
+      <div className="relative z-10">
+        {/* Header */}
+      <div className="relative bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-300 rounded-full translate-x-1/3 translate-y-1/3" />
+        </div>
+        <div className="relative px-6 py-12 text-center">
+          <h1 className="text-3xl font-bold text-white">Noticias</h1>
+          <p className="text-blue-200 mt-1 text-sm">Mantente al día con todo lo que ocurre en la carrera</p>
+        </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 flex items-center gap-2 py-3 overflow-x-auto">
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-100 mb-12">
+        <div className="max-w-6xl mx-auto px-6 flex items-center gap-6 py-4 overflow-x-auto no-scrollbar">
           {CATS.map(c => (
             <button key={c.value} onClick={() => setCat(c.value)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
+              className={`shrink-0 text-sm font-semibold transition-colors ${
                 cat === c.value
-                  ? 'bg-blue-700 text-white border-blue-700'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-400 hover:text-blue-700'
+                  ? 'text-slate-900 border-b-2 border-slate-900 pb-1'
+                  : 'text-slate-400 hover:text-slate-600 pb-1 border-b-2 border-transparent'
               }`}>{c.label}</button>
           ))}
         </div>
       </div>
 
       {/* Cards */}
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6">
         {loading ? (
-          <div className="text-center py-20 text-gray-400 text-sm">Cargando noticias...</div>
+          <div className="py-20 text-slate-400 text-sm animate-pulse tracking-wide uppercase">Cargando noticias...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-400 text-sm">No hay noticias en esta categoría.</div>
+          <div className="py-20 text-slate-400 text-base font-medium">No hay noticias en esta categoría.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {filtered.map(n => (
-              <div key={n.id} onClick={() => navigate(`/noticias/${n.id}`)}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group">
-                <div className="h-44 overflow-hidden relative">
-                  {n.imagen
-                    ? <img src={n.imagen} alt={n.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    : <div className={`w-full h-full flex items-center justify-center ${CAT_BG[n.categoria] ?? 'bg-blue-400'}`}>
-                        <span className="text-white text-5xl font-bold opacity-40">{n.titulo[0]}</span>
-                      </div>
-                  }
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${CAT_COLORS[n.categoria] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {CATS.find(c => c.value === n.categoria)?.label ?? n.categoria}
-                    </span>
-                    <span className="text-xs text-gray-400">{fechaFormato(n.fecha)}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-gray-900 leading-snug mb-2">{n.titulo}</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">{n.descripcion}</p>
-                  {n.fecha_realizacion && (
-                    <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
-                      <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-[11px] text-indigo-600 font-medium">Se realiza el {fechaFormato(n.fecha_realizacion)}</span>
+              <article key={n.id} onClick={() => navigate(`/noticias/${n.id}`)}
+                className="group cursor-pointer flex flex-col">
+                
+                {/* Imagen limpia */}
+                <figure className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 mb-5 border border-slate-100">
+                  {n.imagen ? (
+                    <img src={n.imagen} alt={n.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                      <span className="text-slate-300 text-6xl font-black">{n.titulo[0]}</span>
                     </div>
                   )}
-                  <div className="mt-3 pt-2">
-                    <span className="text-xs text-blue-600 font-semibold group-hover:underline">Más información →</span>
+                  {/* Etiqueta flotante */}
+                  <div className="absolute top-4 left-4">
+                    <span className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider bg-white/90 backdrop-blur-sm text-slate-700 shadow-sm`}>
+                      {CATS.find(c => c.value === n.categoria)?.label ?? n.categoria}
+                    </span>
+                  </div>
+                </figure>
+
+                {/* Contenido */}
+                <div className="flex flex-col flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-xs font-medium text-slate-400 capitalize">{fechaFormato(n.fecha)}</span>
+                    {n.fecha_realizacion && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                        <span className="text-xs font-medium text-indigo-500 flex items-center gap-1">
+                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                           </svg>
+                           {fechaFormato(n.fecha_realizacion)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-slate-900 leading-tight mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    {n.titulo}
+                  </h3>
+                  
+                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-4">
+                    {n.descripcion}
+                  </p>
+                  
+                  <div className="mt-auto">
+                     <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+                       Leer artículo 
+                       <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                       </svg>
+                     </span>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   )
