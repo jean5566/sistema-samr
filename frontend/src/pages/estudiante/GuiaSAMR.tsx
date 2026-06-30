@@ -1,3 +1,26 @@
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? ''
+
+const documentosFijos = [
+  {
+    titulo: 'Guía de Uso',
+    descripcion: 'Manual de uso de la plataforma para estudiantes',
+    archivo: 'Guía de Uso.pdf',
+    icono: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+    color: 'bg-blue-50 border-blue-100',
+    iconColor: 'text-blue-500',
+    badgeColor: 'bg-blue-100 text-blue-600',
+  },
+  {
+    titulo: 'SAMR: Aplicación de la Tecnología',
+    descripcion: 'Documento de referencia sobre el modelo SAMR aplicado a la educación',
+    archivo: 'SAMR_Aplicacion de la tecnologia.pdf',
+    icono: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    color: 'bg-teal-50 border-teal-100',
+    iconColor: 'text-teal-500',
+    badgeColor: 'bg-teal-100 text-teal-600',
+  },
+]
+
 export function EstudianteGuiaSAMR() {
   const niveles = [
     {
@@ -107,6 +130,39 @@ export function EstudianteGuiaSAMR() {
       </div>
 
       <div className="flex-1 px-4 sm:px-8 pb-12 w-full max-w-5xl mx-auto space-y-8">
+
+        {/* Documentos fijos */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 sm:p-8">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1">Documentos de referencia</h3>
+          <p className="text-slate-500 text-xs sm:text-sm mb-4 sm:mb-6">Materiales disponibles para descargar</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {documentosFijos.map((doc) => (
+              <a
+                key={doc.archivo}
+                href={`${BACKEND_URL}/storage/documentos/${encodeURIComponent(doc.archivo)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-start gap-4 ${doc.color} border rounded-2xl p-4 hover:shadow-md transition-shadow group`}
+              >
+                <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm`}>
+                  <svg className={`w-5 h-5 ${doc.iconColor}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={doc.icono} />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-slate-900 leading-tight">{doc.titulo}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{doc.descripcion}</p>
+                  <span className={`inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${doc.badgeColor}`}>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Descargar PDF
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
 
         {/* ¿Qué es SAMR? */}
         <div className="bg-blue-50 border border-blue-100 rounded-[2rem] px-5 py-5 sm:px-8 sm:py-8 shadow-sm">
