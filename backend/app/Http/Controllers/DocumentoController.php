@@ -49,10 +49,10 @@ class DocumentoController extends Controller
             'tipo'        => 'required|string|max:100',
             'acceso'      => 'required|in:publico,interno',
             'descripcion' => 'nullable|string',
-            'archivo'     => 'required|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:20480',
+            'archivo'     => 'required|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:102400',
         ], [
             'archivo.mimetypes' => 'El archivo debe ser PDF, Word (.doc, .docx) o Excel (.xls, .xlsx).',
-            'archivo.max'       => 'El archivo no puede pesar más de 20 MB.',
+            'archivo.max'       => 'El archivo no puede pesar más de 100 MB.',
             'archivo.required'  => 'Debes seleccionar un archivo.',
             'archivo.file'      => 'El archivo subido no es válido.',
         ]);
@@ -85,10 +85,10 @@ class DocumentoController extends Controller
             'tipo'        => 'sometimes|string|max:100',
             'acceso'      => 'sometimes|in:publico,interno',
             'descripcion' => 'nullable|string',
-            'archivo'     => 'sometimes|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:20480',
+            'archivo'     => 'sometimes|file|mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream|max:102400',
         ], [
             'archivo.mimetypes' => 'El archivo debe ser PDF, Word (.doc, .docx) o Excel (.xls, .xlsx).',
-            'archivo.max'       => 'El archivo no puede pesar más de 20 MB.',
+            'archivo.max'       => 'El archivo no puede pesar más de 100 MB.',
             'archivo.file'      => 'El archivo subido no es válido.',
         ]);
 

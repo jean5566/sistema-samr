@@ -44,6 +44,8 @@ RUN apk add --no-cache \
         pcntl \
     && apk del .build-deps
 
+COPY docker/php.ini /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www/html
 
 COPY backend/ ./

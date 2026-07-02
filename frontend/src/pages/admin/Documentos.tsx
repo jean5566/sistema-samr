@@ -353,7 +353,7 @@ export function AdminDocumentos() {
             <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{editingId !== null ? 'Editar documento' : 'Subir documento'}</h2>
-                <p className="text-sm font-medium text-slate-500 mt-1">PDF, DOCX o XLSX — máx. 20 MB</p>
+                <p className="text-sm font-medium text-slate-500 mt-1">PDF, DOCX o XLSX — máx. 100 MB</p>
               </div>
               <button onClick={() => setModalOpen(false)} className="p-2.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-white shadow-sm transition-all">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
