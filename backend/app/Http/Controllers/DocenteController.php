@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Docente;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class DocenteController extends Controller
@@ -33,7 +34,7 @@ class DocenteController extends Controller
         ]);
 
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('docentes', 'public');
+            $data['foto'] = $this->storeFoto($request->file('foto'));
         }
 
         $docente = Docente::create($data);
@@ -63,7 +64,7 @@ class DocenteController extends Controller
             if ($docente->foto) {
                 Storage::disk('public')->delete($docente->foto);
             }
-            $data['foto'] = $request->file('foto')->store('docentes', 'public');
+            $data['foto'] = $this->storeFoto($request->file('foto'));
         }
 
         $docente->update($data);
@@ -103,7 +104,7 @@ class DocenteController extends Controller
             Storage::disk('public')->delete($docente->foto);
         }
 
-        $path = $request->file('foto')->store('docentes', 'public');
+        $path = $this->storeFoto($request->file('foto'));
         $docente->update(['foto' => $path]);
         $docente->refresh();
 
@@ -111,5 +112,22 @@ class DocenteController extends Controller
             'foto'     => $docente->foto,
             'foto_url' => $docente->foto_url,
         ]);
+    }
+
+    /**
+     * Store an uploaded photo on the public disk.
+     *
+     * Avoids UploadedFile::store(), which resolves the temp file via
+     * realpath() and fails with "Path must not be empty" when PHP's
+     * upload temp directory (e.g. C:\Windows\Temp) is not resolvable
+     * by the web server process.
+     */
+    private function storeFoto(UploadedFile $file): string
+    {
+        $path = 'docentes/'.$file->hashName();
+
+        Storage::disk('public')->put($path, $file->get());
+
+        return $path;
     }
 }

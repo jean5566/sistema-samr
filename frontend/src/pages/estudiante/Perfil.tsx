@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useAuth } from '../../lib/AuthContext'
 import api from '../../lib/api'
 
 function Toast({ msg, visible, ok }: { msg: string; visible: boolean; ok: boolean }) {
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${ok ? 'bg-emerald-500' : 'bg-red-500'}`}>
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white text-sm font-bold px-5 py-4 rounded-[1.5rem] shadow-2xl transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+      <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${ok ? 'bg-emerald-500' : 'bg-red-500'}`}>
         {ok
-          ? <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-          : <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          ? <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          : <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         }
       </span>
       {msg}
@@ -16,8 +16,8 @@ function Toast({ msg, visible, ok }: { msg: string; visible: boolean; ok: boolea
   )
 }
 
-const inputCls = 'w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-const labelCls = 'block text-xs font-medium text-gray-600 mb-1.5'
+const inputCls = 'w-full px-5 py-2.5 rounded-full border border-slate-200 text-sm text-slate-900 bg-white hover:bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all placeholder:text-slate-400 shadow-sm'
+const labelCls = 'block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide ml-2'
 
 export function EstudiantePerfil() {
   const { user, setUser } = useAuth()
@@ -27,7 +27,6 @@ export function EstudiantePerfil() {
   const [passNueva, setPassNueva] = useState('')
   const [passConf,  setPassConf]  = useState('')
   const [saving,    setSaving]    = useState(false)
-  const [editEnabled, setEditEnabled] = useState<boolean | null>(null)
   const [toast,     setToast]     = useState({ visible: false, msg: '', ok: true })
 
   function showToast(msg: string, ok = true) { setToast({ visible: true, msg, ok }) }
@@ -37,12 +36,6 @@ export function EstudiantePerfil() {
       return () => clearTimeout(t)
     }
   }, [toast.visible])
-
-  useEffect(() => {
-    api.get('/configuracion')
-      .then(res => setEditEnabled(res.data.estudiantes_editar_perfil === '1'))
-      .catch(() => setEditEnabled(false))
-  }, [])
 
   async function guardar() {
     if (passNueva && passNueva !== passConf) {
@@ -73,56 +66,36 @@ export function EstudiantePerfil() {
     .join('')
 
   return (
-    <>
-      <div className="bg-white border-b border-gray-200 px-8 py-3.5 shrink-0">
-        <p className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">Estudiante</p>
-        <h1 className="text-base font-semibold text-gray-900 mt-0.5">Mi Perfil</h1>
+    <div className="min-h-screen text-slate-900 font-sans overflow-y-auto flex flex-col">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 shrink-0">
+        <h1 className="text-lg sm:text-[28px] font-bold text-slate-900 tracking-tight">Mi Perfil</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="max-w-xl flex flex-col gap-5">
+      <div className="flex-1 px-4 sm:px-8 pb-12">
+        <div className="max-w-2xl mx-auto flex flex-col gap-5">
 
           {/* Avatar */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold shrink-0">
+          <div className="bg-white rounded-[2rem] border border-slate-100/60 p-5 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8 shadow-sm">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shrink-0 shadow-lg shadow-blue-500/30">
               {iniciales || '?'}
             </div>
-            <div>
-              <h2 className="text-base font-bold text-gray-900">{user?.name}</h2>
-              <p className="text-sm text-gray-400">{user?.email}</p>
-              <span className="inline-block mt-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Estudiante</span>
+            <div className="text-center sm:text-left flex-1 mt-2">
+              <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">{user?.name}</h2>
+              <p className="text-sm font-medium text-slate-500 mt-1">{user?.email}</p>
+              <div className="inline-flex mt-4 items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-wide">
+                Estudiante
+              </div>
             </div>
           </div>
 
-          {/* Loading */}
-          {editEnabled === null && (
-            <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
-          )}
-
-          {/* Edición deshabilitada */}
-          {editEnabled === false && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.193 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-800">Edición no habilitada</p>
-                <p className="text-xs text-amber-600 mt-1 leading-relaxed">Tu docente aún no ha habilitado la edición de perfil. Si necesitas actualizar tus datos, consulta con el área académica.</p>
-              </div>
-            </div>
-          )}
-
           {/* Formulario */}
-          {editEnabled === true && (
-            <section className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100">
-                <h2 className="text-sm font-semibold text-gray-900">Información personal</h2>
-                <p className="text-xs text-gray-400 mt-0.5">Actualiza tu nombre, correo o contraseña.</p>
+          <section className="bg-white rounded-[2rem] border border-slate-100/60 overflow-hidden shadow-sm flex flex-col group/card">
+              <div className="px-8 py-6 border-b border-slate-100/80 bg-slate-50/30">
+                <h2 className="text-base font-bold text-slate-900">Información personal</h2>
+                <p className="text-sm font-medium text-slate-500 mt-1">Actualiza tu nombre, correo o contraseña.</p>
               </div>
-              <div className="p-5 flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="p-8 flex flex-col gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className={labelCls}>Nombre completo</label>
                     <input value={nombre} onChange={e => setNombre(e.target.value)} className={inputCls} />
@@ -132,11 +105,11 @@ export function EstudiantePerfil() {
                     <input type="email" value={correo} onChange={e => setCorreo(e.target.value)} className={inputCls} />
                   </div>
                 </div>
-                <div className="border-t border-gray-100 pt-4">
-                  <p className="text-xs font-medium text-gray-500 mb-3">
-                    Cambiar contraseña <span className="text-gray-400 font-normal">(opcional)</span>
+                <div className="border-t border-slate-100/80 pt-6 mt-2">
+                  <p className="text-sm font-bold text-slate-800 mb-4">
+                    Cambiar contraseña <span className="text-slate-400 font-medium">(opcional)</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className={labelCls}>Nueva contraseña</label>
                       <input type="password" value={passNueva} onChange={e => setPassNueva(e.target.value)}
@@ -149,20 +122,19 @@ export function EstudiantePerfil() {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end pt-4">
                   <button onClick={guardar} disabled={saving}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition disabled:opacity-60">
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-bold px-8 py-3 rounded-full transition-all shadow-md shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-60 disabled:hover:shadow-none">
                     {saving ? 'Guardando...' : 'Guardar cambios'}
                   </button>
                 </div>
               </div>
             </section>
-          )}
 
         </div>
       </div>
 
       <Toast msg={toast.msg} visible={toast.visible} ok={toast.ok} />
-    </>
+    </div>
   )
 }

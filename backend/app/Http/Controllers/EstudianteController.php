@@ -6,9 +6,31 @@ use App\Models\Docente;
 use App\Models\PerfilEdicionLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class EstudianteController extends Controller
 {
+    public function updatePerfil(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name'     => 'sometimes|string|max:255',
+            'email'    => "sometimes|email|unique:users,email,{$user->id}",
+            'password' => 'sometimes|nullable|string|min:6',
+        ]);
+
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return response()->json($user->refresh());
+    }
+
     public function updateDocentePerfil(Request $request, Docente $docente): JsonResponse
     {
         $user = $request->user();

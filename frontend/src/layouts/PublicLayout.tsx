@@ -5,7 +5,7 @@ export function PublicLayout() {
   return (
     <>
       <Navbar />
-      <div className="pt-[100px] font-sans">
+      <div className="pt-16 sm:pt-[100px] font-sans">
         <Outlet />
       </div>
     </>

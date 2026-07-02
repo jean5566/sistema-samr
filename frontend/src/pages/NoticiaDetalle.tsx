@@ -57,18 +57,18 @@ export function NoticiaDetallePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Cargando...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-slate-400 text-sm animate-pulse tracking-wide uppercase">Cargando...</p>
       </div>
     )
   }
 
   if (notFound || !noticia) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500 text-lg font-semibold">Noticia no encontrada</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6">
+        <p className="text-slate-400 text-lg font-medium">No se encontró este artículo</p>
         <button onClick={() => navigate('/noticias')}
-          className="text-blue-600 hover:underline text-sm">
+          className="px-6 py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors text-sm font-medium">
           Volver a noticias
         </button>
       </div>
@@ -76,62 +76,67 @@ export function NoticiaDetallePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Imagen de portada */}
-      <div className="relative w-full" style={{ height: '380px' }}>
-        {noticia.imagen
-          ? <>
-              <img src={noticia.imagen} alt={noticia.titulo} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-            </>
-          : <div className={`w-full h-full ${CAT_BG[noticia.categoria] ?? 'bg-blue-500'} flex items-center justify-center`}>
-              <span className="text-white/20 text-[120px] font-black leading-none">{noticia.titulo[0]}</span>
-            </div>
-        }
-        {/* Botón volver */}
-        <button onClick={() => navigate('/noticias')}
-          className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-medium px-4 py-2 rounded-full transition">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 selection:bg-slate-200 relative overflow-hidden">
+      {/* Patrón de puntos decorativo en el fondo */}
+      <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none z-0 opacity-50"></div>
+
+      <div className="relative z-10">
+        {/* Header flotante minimalista */}
+      <header className="max-w-4xl mx-auto px-6 py-10 flex items-center">
+        <button 
+          onClick={() => navigate('/noticias')}
+          className="group flex items-center gap-2.5 text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors"
+        >
+          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Volver
+          Noticias
         </button>
-        {/* Categoría badge */}
-        <div className="absolute bottom-6 left-6 z-10">
-          <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${CAT_COLORS[noticia.categoria] ?? 'bg-gray-100 text-gray-600'}`}>
-            {CATS[noticia.categoria] ?? noticia.categoria}
-          </span>
-        </div>
-      </div>
+      </header>
 
-      {/* Contenido */}
-      <div className="max-w-3xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-5">{noticia.titulo}</h1>
-
-        {/* Fechas */}
-        <div className="flex flex-wrap gap-5 mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>Publicado el <strong className="text-gray-700 font-semibold capitalize">{fmt(noticia.fecha)}</strong></span>
+      <main className="max-w-3xl mx-auto px-6">
+        {/* Cabecera del artículo */}
+        <header className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+              {CATS[noticia.categoria] ?? noticia.categoria}
+            </span>
+            <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+            <span className="text-sm font-medium text-slate-500 capitalize">
+              {fmt(noticia.fecha)}
+            </span>
           </div>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-[1.1] mb-8">
+            {noticia.titulo}
+          </h1>
+
           {noticia.fecha_realizacion && (
-            <div className="flex items-center gap-2 text-sm text-indigo-600">
-              <svg className="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="inline-flex items-center gap-2.5 text-sm font-medium text-slate-500 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
+              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Fecha de realización: <strong className="font-semibold capitalize">{fmt(noticia.fecha_realizacion)}</strong></span>
+              Realización: <span className="capitalize text-slate-700">{fmt(noticia.fecha_realizacion)}</span>
             </div>
           )}
-        </div>
+        </header>
 
-        <div className="w-full h-px bg-gray-200 mb-8" />
+        {/* Imagen limpia */}
+        {noticia.imagen && (
+          <figure className="mb-14">
+            <img 
+              src={noticia.imagen} 
+              alt={noticia.titulo} 
+              className="w-full h-auto aspect-[16/9] object-cover rounded-3xl bg-slate-50 shadow-sm border border-slate-100" 
+            />
+          </figure>
+        )}
 
-        {/* Descripción completa */}
-        <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
+        {/* Contenido principal */}
+        <article className="prose prose-slate prose-lg sm:prose-xl max-w-none text-slate-700 leading-relaxed font-normal whitespace-pre-wrap">
           {noticia.descripcion}
-        </div>
+        </article>
+      </main>
       </div>
     </div>
   )

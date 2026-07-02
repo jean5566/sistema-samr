@@ -8,25 +8,15 @@ export function AuthLayout() {
     <div className="h-screen w-full flex overflow-hidden">
 
       {/* ── Panel izquierdo fijo ── */}
-      <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center"
+      <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg,#0f1f45 0%,#1e3a6e 50%,#2a4d8f 100%)' }}>
 
-        {/* Orbs */}
-        <div className="auth-orb-1 absolute top-[-80px] left-[-60px] w-80 h-80 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(91,138,197,0.4) 0%,transparent 70%)', filter:'blur(40px)' }} />
-        <div className="auth-orb-2 absolute bottom-[-60px] right-[-40px] w-96 h-96 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(61,109,181,0.35) 0%,transparent 70%)', filter:'blur(50px)' }} />
-        <div className="auth-orb-3 absolute top-[35%] right-[5%] w-56 h-56 rounded-full pointer-events-none"
-          style={{ background:'radial-gradient(circle,rgba(123,163,212,0.2) 0%,transparent 70%)', filter:'blur(30px)' }} />
-
-        {/* Grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-          style={{ backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize:'50px 50px' }} />
+        {/* Fondo Logo / Marca de agua (Girado en la esquina superior derecha hacia la izquierda) */}
+        <div className="absolute -top-40 -right-50 w-[800px] h-[800px] pointer-events-none opacity-[0.12] mix-blend-screen invert grayscale bg-no-repeat bg-contain bg-center transform -rotate-25"
+          style={{ backgroundImage: 'url("/logo.png")' }} />
 
         {/* Contenido */}
         <div className="relative z-10 flex flex-col items-center text-center px-12">
-          <img src="/logo.png" alt="CTI UNESUM"
-            className="auth-logo-pop h-24 w-24 object-contain rounded-full bg-white/10 p-2 shadow-2xl mb-8" />
           <h1 className="auth-fade-1 text-white text-3xl font-bold leading-tight">
             Tecnologías de<br />la Información
           </h1>
@@ -65,18 +55,23 @@ export function AuthLayout() {
       {/* ── Panel derecho — cambia por ruta ── */}
       <div
         key={location.pathname}
-        className="auth-card-enter w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-10 overflow-y-auto relative">
+        className="auth-card-enter w-full lg:w-1/2 flex flex-col bg-slate-50 overflow-y-auto relative">
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-50 z-0" />
 
-        {/* Volver — solo mobile */}
-        <button onClick={() => navigate('/')}
-          className="lg:hidden absolute top-5 left-5 flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition text-xs font-medium">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver
-        </button>
+        {/* Topbar Volver — solo mobile */}
+        <div className="lg:hidden relative z-10 px-4 pt-4 pb-2 shrink-0">
+          <button onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition text-xs font-semibold shadow-sm">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver al inicio
+          </button>
+        </div>
 
-        <Outlet />
+        <div className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10">
+          <Outlet />
+        </div>
       </div>
     </div>
   )
