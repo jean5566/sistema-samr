@@ -29,11 +29,20 @@ function soloCorreo(texto: string) {
   return texto.toLowerCase().replace(/[^a-z0-9._-]/g, '')
 }
 
+function validarPassword(pass: string) {
+  return {
+    mayuscula: /^[A-ZÁÉÍÓÚÑ]/.test(pass),
+    longitud:  pass.length > 8,
+    numero:    /[0-9]/.test(pass),
+    especial:  /[^A-Za-z0-9]/.test(pass),
+  }
+}
+
 export function Registro() {
   const [habilitado, setHabilitado] = useState<boolean | null>(null)
   const [role, setRole]             = useState<Role | null>(null)
-  const [apellidos, setApellidos]   = useState('')
   const [nombres, setNombres]       = useState('')
+  const [apellidos, setApellidos]   = useState('')
   const [correo, setCorreo]         = useState('')
   const [pass, setPass]             = useState('')
   const [passConf, setPassConf]     = useState('')
@@ -54,18 +63,22 @@ export function Registro() {
 
   async function handleRegister() {
     if (!role)                        { setError('Selecciona tu tipo de usuario.'); return }
-    if (!apellidos)                   { setError('Ingresa tus apellidos.'); return }
-    if (contarPalabras(apellidos) < 2){ setError('Ingresa tus 2 apellidos completos.'); return }
     if (!nombres)                     { setError('Ingresa tus nombres.'); return }
     if (contarPalabras(nombres) < 2)  { setError('Ingresa tus 2 nombres completos.'); return }
+    if (!apellidos)                   { setError('Ingresa tus apellidos.'); return }
+    if (contarPalabras(apellidos) < 2){ setError('Ingresa tus 2 apellidos completos.'); return }
     if (!correo)           { setError('Ingresa tu correo institucional.'); return }
     if (!pass)             { setError('Ingresa una contraseña.'); return }
-    if (pass.length <= 8)  { setError('La contraseña debe tener más de 8 caracteres.'); return }
+    const chk = validarPassword(pass)
+    if (!chk.mayuscula)    { setError('La contraseña debe empezar con una letra mayúscula.'); return }
+    if (!chk.longitud)     { setError('La contraseña debe tener más de 8 caracteres.'); return }
+    if (!chk.numero)       { setError('La contraseña debe incluir al menos un número.'); return }
+    if (!chk.especial)     { setError('La contraseña debe incluir al menos un carácter especial (ej. !@#$%).'); return }
     if (pass !== passConf) { setError('Las contraseñas no coinciden.'); return }
     setError('')
     setLoading(true)
     try {
-      const name  = `${capitalizarNombre(apellidos)} ${capitalizarNombre(nombres)}`
+      const name  = `${capitalizarNombre(nombres)} ${capitalizarNombre(apellidos)}`
       const email = `${correo}${DOMINIO_CORREO}`
       await api.post('/register', { name, email, password: pass, password_confirmation: passConf, role })
       setPendiente(true)
@@ -172,22 +185,8 @@ export function Registro() {
               </div>
             </div>
 
-            {/* Apellidos y nombres */}
+            {/* Nombres y apellidos */}
             <div className="auth-fade-4 grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 sm:mb-5">
-              <div>
-                <label className="block text-[10px] sm:text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1 truncate">Apellidos</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <svg className="w-4 h-4 text-slate-300 group-focus-within:text-blue-500 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                    </svg>
-                  </div>
-                  <input value={apellidos} onChange={e => setApellidos(soloLetras(e.target.value))}
-                    onBlur={() => setApellidos(capitalizarNombre(apellidos))}
-                    placeholder="Primer Apellido Segundo"
-                    className="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
-                </div>
-              </div>
               <div>
                 <label className="block text-[10px] sm:text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1 truncate">Nombres</label>
                 <div className="relative group">
@@ -199,6 +198,20 @@ export function Registro() {
                   <input value={nombres} onChange={e => setNombres(soloLetras(e.target.value))}
                     onBlur={() => setNombres(capitalizarNombre(nombres))}
                     placeholder="Primer Nombre Segundo"
+                    className="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] sm:text-xs font-bold tracking-wide text-slate-400 uppercase mb-2 ml-1 truncate">Apellidos</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <svg className="w-4 h-4 text-slate-300 group-focus-within:text-blue-500 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                    </svg>
+                  </div>
+                  <input value={apellidos} onChange={e => setApellidos(soloLetras(e.target.value))}
+                    onBlur={() => setApellidos(capitalizarNombre(apellidos))}
+                    placeholder="Primer Apellido Segundo"
                     className="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-300 bg-slate-50 hover:bg-white focus:bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300" />
                 </div>
               </div>
@@ -251,7 +264,23 @@ export function Registro() {
                 </div>
               </div>
             </div>
-            <p className="auth-fade-5 text-[11px] text-slate-400 -mt-2 mb-4 sm:mb-5 ml-1">La contraseña debe tener más de 8 caracteres.</p>
+            <div className="auth-fade-5 grid grid-cols-2 gap-x-3 gap-y-1 -mt-2 mb-4 sm:mb-5 ml-1">
+              {[
+                { ok: validarPassword(pass).mayuscula, texto: 'Empieza con mayúscula' },
+                { ok: validarPassword(pass).longitud,  texto: 'Más de 8 caracteres' },
+                { ok: validarPassword(pass).numero,    texto: 'Al menos un número' },
+                { ok: validarPassword(pass).especial,  texto: 'Un carácter especial' },
+              ].map((req, i) => (
+                <div key={i} className={`flex items-center gap-1.5 text-[11px] transition-colors duration-300 ${req.ok ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    {req.ok
+                      ? <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      : <circle cx="12" cy="12" r="9" strokeWidth="2" />}
+                  </svg>
+                  {req.texto}
+                </div>
+              ))}
+            </div>
 
             <label className="auth-fade-6 flex items-center gap-2.5 mb-4 sm:mb-6 cursor-pointer select-none w-fit ml-1">
               <input type="checkbox" checked={showPass} onChange={e => setShowPass(e.target.checked)}

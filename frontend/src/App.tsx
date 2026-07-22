@@ -7,6 +7,8 @@ import { DashboardLayout } from './layouts/DashboardLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { ResetPassword } from './pages/ResetPassword'
 import { Registro } from './pages/Registro'
 import { SobreCarrera } from './pages/SobreCarrera'
 import { DocentesPage } from './pages/Docentes'
@@ -49,6 +51,8 @@ function AppRoutes() {
 
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/registro" element={<Registro />} />
       </Route>
 

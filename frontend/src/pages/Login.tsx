@@ -8,6 +8,8 @@ const destinos: Record<string, string> = {
   estudiante: '/dashboard/estudiante',
 }
 
+const DOMINIO_CORREO = '@unesum.edu.ec'
+
 export function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -20,6 +22,10 @@ export function Login() {
 
   async function handleLogin() {
     if (!email || !pass) { setError('Ingresa tu correo y contraseña.'); return }
+    if (!email.toLowerCase().endsWith(DOMINIO_CORREO)) {
+      setError(`El correo debe pertenecer al dominio ${DOMINIO_CORREO}`)
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -27,7 +33,7 @@ export function Login() {
       navigate(destinos[user.role] ?? '/')
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } }
-      setError(e.response?.data?.message ?? 'Correo o contraseña incorrectos.')
+      setError(e.response?.data?.message ?? 'No se pudo iniciar sesión.')
     } finally {
       setLoading(false)
     }
@@ -66,7 +72,7 @@ export function Login() {
       <div className="auth-fade-4 mb-6">
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-xs font-semibold text-gray-500">Contraseña</label>
-          <a href="#" className="text-xs text-blue-600 hover:text-blue-800 transition">¿Olvidaste tu contraseña?</a>
+          <Link to="/forgot-password" className="text-xs text-blue-600 hover:text-blue-800 transition">¿Olvidaste tu contraseña?</Link>
         </div>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

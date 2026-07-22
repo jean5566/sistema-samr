@@ -16,6 +16,8 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
+Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
 Route::get('registro-estado', [AuthController::class, 'registroEstado']);
 Route::post('register', [AuthController::class, 'register']);
 Route::get('docentes', [DocenteController::class, 'index']);
